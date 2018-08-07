@@ -17,3 +17,13 @@ def connect_to_db(app):
 
     # actual connection
     db.init_app(app)
+
+
+if __name__ == "__main__":
+    """Run this module interactively to work with the database directly."""
+
+    from food_trends import app
+
+    # connect to db
+    connect_to_db(app)
+    print("Connected to DB interactively.")
