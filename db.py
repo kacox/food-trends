@@ -1,0 +1,1 @@
+"""Database functions for Food Trends application."""
