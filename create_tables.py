@@ -1,7 +1,7 @@
 """
 Code to create tables in Food Trends application.
 
-Run directly to create tables from scratch.
+Run directly to create (empty) tables from scratch.
 """
 
 # imports
@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, MetaData, ForeignKey
 from sqlalchemy import Integer, String, BigInteger, DateTime
 
-# CREATE ENGINE (core interface to db)
+### CREATE ENGINE (core interface to db)
 engine = create_engine("postgresql:///food_trends", echo=True)
 
 
@@ -23,22 +23,20 @@ real DBAPI connection to the database, which is then used to emit the SQL.
 """
 
 
-# CREATE TABLES
-# if there are no tables to import (can't do table reflection)...
+### CREATE TABLES
 
 # MetaData: a collection of Table objects and their associated schema 
 # constructs.
 metadata = MetaData()
 
 food_terms = Table('food_terms', metadata,
-     Column('term', String(30), primary_key=True))
-
-# is it ok to only have one column????
+     Column('id', Integer, primary_key=True), 
+     Column('term', String(30), nullable=False))
 
 pairings = Table('pairings', metadata,
      Column('pairing_id', BigInteger, primary_key=True, autoincrement=True),
-     Column('food_term1', String(30), ForeignKey("food_terms.term"), nullable=False),
-     Column('food_term2', String(30), ForeignKey("food_terms.term"), nullable=False),
+     Column('food_id1', Integer, ForeignKey("food_terms.id"), nullable=False),
+     Column('food_id2', Integer, ForeignKey("food_terms.id"), nullable=False),
      Column('search_id', BigInteger, ForeignKey("searches.id"), nullable=False))
 
 searches = Table('searches', metadata,
@@ -46,7 +44,7 @@ searches = Table('searches', metadata,
      Column('user_timestamp', DateTime, nullable=False),
      Column('search_window_start', DateTime, nullable=False),
      Column('search_window_end', DateTime, nullable=False),
-     Column('food_term', String, ForeignKey("food_terms.term"), nullable=False),
+     Column('food_id', Integer, ForeignKey("food_terms.id"), nullable=False),
      Column('num_matches_total', Integer, nullable=False))
 
 results = Table('results', metadata,
@@ -57,5 +55,5 @@ results = Table('results', metadata,
      Column('search_id', BigInteger, ForeignKey("searches.id"), nullable=False))
 
 
-# CREATE TABLES IN DB
+### CREATE TABLES IN DB
 metadata.create_all(engine)
