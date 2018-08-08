@@ -29,30 +29,30 @@ real DBAPI connection to the database, which is then used to emit the SQL.
 # constructs.
 metadata = MetaData()
 
-food_terms = Table('food_terms', metadata,
-     Column('id', Integer, primary_key=True), 
-     Column('term', String(30), nullable=False))
+food_terms = Table("food_terms", metadata,
+     Column("id", Integer, primary_key=True), 
+     Column("term", String(30), nullable=False))
 
-pairings = Table('pairings', metadata,
-     Column('pairing_id', BigInteger, primary_key=True, autoincrement=True),
-     Column('food_id1', Integer, ForeignKey("food_terms.id"), nullable=False),
-     Column('food_id2', Integer, ForeignKey("food_terms.id"), nullable=False),
-     Column('search_id', BigInteger, ForeignKey("searches.id"), nullable=False))
+pairings = Table("pairings", metadata,
+     Column("pairing_id", BigInteger, primary_key=True, autoincrement=True),
+     Column("food_id1", Integer, ForeignKey("food_terms.id"), nullable=False),
+     Column("food_id2", Integer, ForeignKey("food_terms.id"), nullable=False),
+     Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False))
 
-searches = Table('searches', metadata,
-     Column('id', BigInteger, primary_key=True, autoincrement=True),
-     Column('user_timestamp', DateTime, nullable=False),
-     Column('search_window_start', DateTime, nullable=False),
-     Column('search_window_end', DateTime, nullable=False),
-     Column('food_id', Integer, ForeignKey("food_terms.id"), nullable=False),
-     Column('num_matches_total', Integer, nullable=False))
+searches = Table("searches", metadata,
+     Column("id", BigInteger, primary_key=True, autoincrement=True),
+     Column("user_timestamp", DateTime, nullable=False),
+     Column("search_window_start", DateTime, nullable=False),
+     Column("search_window_end", DateTime, nullable=False),
+     Column("food_id", Integer, ForeignKey("food_terms.id"), nullable=False),
+     Column("num_matches_total", Integer, nullable=False))
 
-results = Table('results', metadata,
-     Column('id', BigInteger, primary_key=True),
-     Column('publish_date', DateTime, nullable=False),
-     Column('index_date', DateTime, nullable=False),
-     Column('url', String(150), nullable=False),
-     Column('search_id', BigInteger, ForeignKey("searches.id"), nullable=False))
+results = Table("results", metadata,
+     Column("id", BigInteger, primary_key=True),
+     Column("publish_date", DateTime, nullable=False),
+     Column("index_date", DateTime, nullable=False),
+     Column("url", String(150), nullable=False),
+     Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False))
 
 
 ### CREATE TABLES IN DB

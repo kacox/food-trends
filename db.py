@@ -11,8 +11,8 @@ def connect_to_db(app):
     """Connect the database to Flask app."""
 
     # Configure to use 'food_trends' db
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///food_trends'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///food_trends"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
 
     # actual connection
