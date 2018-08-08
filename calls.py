@@ -25,17 +25,22 @@ if __name__ == "__main__":
     import sys
 
     if sys.argv[1] == "make_request":
-        # make request then write response to file
+        # check that a filepath is given before making a request
         try:
-            # check if file name argument given
+            # check for filepath
             new_file = sys.argv[2]
         except IndexError as e:
-            # no file name given
+            # no filepath given
             print("Give a file name for the response contents to live.")
         else:
-            # file name argument; make request
+            # filepath given; check for API key before making request
             if MASHAPE_KEY:
+                # make request
                 r = requests.post(endpoint_url, data=payload, headers=headers)
-            # write to file
-            with open(new_file, "w") as f:
-                f.write(r.text)
+
+                # write to file
+                with open(new_file, "w") as f:
+                    f.write(r.text)
+            else:
+                # API key missing
+                print("Need API key in envionment variables.")
