@@ -3,6 +3,7 @@
 # imports
 import os
 import requests
+import json
 
 # get api key from envionment variables
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
@@ -24,7 +25,27 @@ def get_food_terms(input_text, api_key):
     Extract food terms from response (JSON).
     Return as a list (duplicates removed).
     """
-    pass
+    
+    # check that you have the API key
+    if api_key:
+        # assign request arguments
+        endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
+        payload = {"text": input_text}
+        headers = {"X-Mashape-Key": api_key,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"}
+
+        # make request
+        print("Before request")
+        r = requests.post(endpoint_url, data=payload, headers=headers)
+        
+    # extract food terms from response
+    response_text = json.loads(r.text)
+    terms = set()
+    for term in response_text["annotations"]:
+        terms.add(term["annotation"])
+
+    return list(terms)
 
 
 def get_final_term(terms_list):
