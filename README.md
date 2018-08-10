@@ -1,7 +1,6 @@
 ### food-trends
 # Repository for Food Trends web application
 
-## Notes
 This reposity houses my final project for the Hackbright Academy cirriculum.
 
 __CURRENTLY IN PROGRESS__
