@@ -50,7 +50,33 @@ def get_food_terms(input_text, api_key):
 
 def get_final_term(terms_list):
     """Choose final term to use for later queries and pair building."""
-    pass
+
+    # for now, ask in terminal which term to use
+    # CHANGE LATER FOR UI SELECTION (radio buttons or drop down)
+    valid_indx = False
+    print("Final terms:", terms_list)
+    while not valid_indx:
+        print("Pick a term using its index (0 to", 
+                                str(len(terms_list) - 1) + "): ")
+        user_choice = input()
+
+        # input validation
+        try:
+            # check if integer
+            user_choice = int(user_choice)
+
+            # check range
+            if (user_choice > 0) and (user_choice < len(terms_list)):
+                # choice in valid index range
+                valid_indx = True
+            else:
+                print("Choice is out of range.")
+        except ValueError:
+            print("Please choose a valid index as an integer.")
+            
+
+    # select term
+    return terms_list[user_choice]
 
 
 def find_matches(food_term):
