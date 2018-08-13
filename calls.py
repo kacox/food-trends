@@ -21,13 +21,12 @@ headers = {
     "Accept": "application/json"}
 
 
-
+#####################################################################
 def get_food_terms(input_text, api_key):
-    """Get food terms from input text.
+    """Get food terms from input text using Spoonacular API.
 
     Make call to Spoonacular (POST Detect Food in Text endpoint).
-    Extract food terms from response (JSON).
-    Return as a list (duplicates removed).
+    Return list of food terms (dupes removed).
     """
     
     # check that you have the API key
@@ -40,13 +39,23 @@ def get_food_terms(input_text, api_key):
                     "Accept": "application/json"}
 
         # make request
-        print("Before request")
         r = requests.post(endpoint_url, data=payload, headers=headers)
         
     # extract food terms from response
-    response_text = json.loads(r.text)
+    response_content = json.loads(r.text)
+    return terms_from_response(response_content)
+
+
+def terms_from_response(response_content):
+    """Extract food terms from response.
+
+    Input is Python object representation of JSON response; in this case a 
+    dictionary.
+
+    Return list of food term strings.
+    """
     terms = set()
-    for term in response_text["annotations"]:
+    for term in response_content["annotations"]:
         terms.add(term["annotation"])
 
     return list(terms)
