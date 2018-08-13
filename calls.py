@@ -79,7 +79,7 @@ def get_final_term(terms_list):
             user_choice = int(user_choice)
 
             # check range
-            if (user_choice > 0) and (user_choice < len(terms_list)):
+            if (user_choice >= 0) and (user_choice < len(terms_list)):
                 # choice in valid index range
                 valid_indx = True
             else:
