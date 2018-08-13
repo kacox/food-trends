@@ -5,8 +5,12 @@ import os
 import requests
 import json
 
+from twingly_search import Client
+
+
 # get api key from envionment variables
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
+# TWINGLY_SEARCH_KEY pulled from environment variables by library
 
 # build request to Spoonacular POST Detect Food in Text endpoint
 endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
@@ -86,29 +90,73 @@ def find_matches(food_term):
 
     Need to build a query (see below functions).
 
-    Return blog post matches ("results"); you might want to limit the number of 
-    results returned while building out this portion.
+    Return results (list of Post objects); limited to 3 Posts within the 
+    past week while developing.
     """
 
-    # search_window = get_search_window()
-    # build_twingly_query(api_key, search_window)
+    # build query string
+    search_window = get_search_window()
+    q = build_twingly_query(food_term, search_window)
+
     # make the actual query
-    # return the results
-    pass
+    client = Client()
+    results = client.execute_query(q)
+
+    """
+    `results` represents a result from a Query to the Search API
+    Attributes:
+        number_of_matches_returned (int):
+                number of Posts the Query returned
+        number_of_matches_total (int):
+                total number of Posts the Query matched
+        seconds_elapsed (float):
+                number of seconds it took to execute the Query
+        posts (list of Post):
+                all Posts that matched the Query; list of Post objects
+    """
+    return results
 
 
 def get_search_window():
     """
     Determine search window time period for next call to Twingly.
 
-    Options: past week, past month, past 3 months.
+    I am restricting the search window to the past week while developing, 
+    but maybe expand to last month and last three months depending on 
+    average result sizes.
+
+    FROM DOCS:
+        The default is to search in posts published at any time.
+
+        example:
+        `tspan:24h`
+
+        The supported arguments to tspan are:
+
+            h - posts published the last hour
+            12h - posts published the last 12 hours
+            24h - posts published the last 24 hours
+            w - posts published the last week
+            m - posts published the last month
+            3m - posts published the last three months
+
+        how it would look in a final query string:        
+        `q = 'github page-size: 10 lang:sv tspan:24h'`
     """
-    pass
+    # hard-coded for now
+    search_window = "w"
+
+    # return piece to be used in final query
+    return "tspan:" + search_window
 
 
-def build_twingly_query(api_key, search_window):
-    pass
+def build_twingly_query(food_term, search_window):
+    """Build query string for Twingly Blog Search API."""
+    
+    return (food_term + " fields:title lang:en page-size:3 sort:created " + 
+            search_window)
 
+#####################################################################
   
 def make_searches_record():
     """Add a record to the searches table.
