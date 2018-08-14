@@ -111,6 +111,10 @@ def find_matches(food_term):
     client = Client()
     results = client.execute_query(q)
 
+    # add relevant information to dbs
+    #update_food_terms(food_term)
+    #make_searches_record(results)
+
     """
     `results` represents a result from a Query to the Search API
     Attributes:
@@ -166,13 +170,50 @@ def build_twingly_query(food_term, search_window):
             search_window)
 
 #####################################################################
-  
-def make_searches_record():
+def update_food_terms(food_term):
+    """Add a food term to the food_terms table if not there."""
+    from sqlalchemy import create_engine, Table, MetaData
+    from sqlalchemy.exc import IntegrityError
+
+    # create engine(core interface to db)
+    engine = create_engine("postgresql:///food_trends", echo=False)
+
+    # make connection (object)
+    conn = engine.connect()
+
+    # reflect db object
+    metadata = MetaData()
+    food_terms = Table('food_terms', metadata, 
+                        autoload=True, autoload_with=engine)
+
+    # make insert statement (object)
+    # format is 'INSERT INTO food_terms (id, term) VALUES (:id, :term)'
+    ins = food_terms.insert().values(term=food_term.lower())
+
+    # execute insert statement
+    try:
+        result = conn.execute(ins)
+    except IntegrityError:
+        # sqlalchemy wraps psycopg2.IntegrityError with its own exception
+        print("This food term is already in the table.")
+
+    # result is ResultProxy object (analogous to the DBAPI cursor object)
+
+    # release referenced DBAPI connection to the connection pool
+    conn.close()
+
+def make_searches_record(results):
     """Add a record to the searches table.
 
     Fields to include: user_timestamp, search_window_start, search_window_end, 
                         food_id, num_matches_total
     """
+    # when a request is made to the Twingly endpoint (find_matches), run this
+
+    # grab time stamp (UTC)
+    # get search window
+    # get food id
+    # pull number of total matches
     pass
 
 

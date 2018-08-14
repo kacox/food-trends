@@ -28,7 +28,7 @@ metadata = MetaData()
 
 food_terms = Table("food_terms", metadata,
      Column("id", Integer, primary_key=True, autoincrement=True), 
-     Column("term", String(30), nullable=False))
+     Column("term", String(30), nullable=False, unique=True))
 
 pairings = Table("pairings", metadata,
      Column("pairing_id", BigInteger, primary_key=True, autoincrement=True),
