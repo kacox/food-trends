@@ -9,9 +9,6 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, MetaData, ForeignKey
 from sqlalchemy import Integer, String, BigInteger, DateTime
 
-### CREATE ENGINE (core interface to db)
-engine = create_engine("postgresql:///food_trends", echo=True)
-
 
 """
 NOTE TO SELF:
@@ -23,14 +20,14 @@ real DBAPI connection to the database, which is then used to emit the SQL.
 """
 
 
-### CREATE TABLES
+### DEFINE TABLES
 
 # MetaData: a collection of Table objects and their associated schema 
 # constructs.
 metadata = MetaData()
 
 food_terms = Table("food_terms", metadata,
-     Column("id", Integer, primary_key=True), 
+     Column("id", Integer, primary_key=True, autoincrement=True), 
      Column("term", String(30), nullable=False))
 
 pairings = Table("pairings", metadata,
@@ -48,12 +45,23 @@ searches = Table("searches", metadata,
      Column("num_matches_total", Integer, nullable=False))
 
 results = Table("results", metadata,
-     Column("id", BigInteger, primary_key=True),
+     Column("id", BigInteger, primary_key=True, autoincrement=True),
      Column("publish_date", DateTime, nullable=False),
      Column("index_date", DateTime, nullable=False),
      Column("url", String(150), nullable=False),
      Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False))
 
 
-### CREATE TABLES IN DB
-metadata.create_all(engine)
+if __name__ == '__main__':
+     """Create tables if script run directly."""
+
+     ### CREATE ENGINE (core interface to db)
+     engine = create_engine("postgresql:///food_trends", echo=True)
+
+     ### CREATE TABLES IN DB
+     ans = input("Are you sure you want to make the tables? (Y/N) ")
+     if ans.upper() == "Y":
+          # create tables
+          metadata.create_all(engine)
+          # report completion
+          print("Tables made in db.")
