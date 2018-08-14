@@ -62,6 +62,6 @@ if __name__ == '__main__':
      ans = input("Are you sure you want to make the tables? (Y/N) ")
      if ans.upper() == "Y":
           # create tables
-          metadata.create_all(engine)
+          metadata.create_all(engine, checkfirst=True)
           # report completion
           print("Tables made in db.")
