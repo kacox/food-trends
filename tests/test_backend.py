@@ -10,7 +10,7 @@ import calls
 
 
 # skip unless you specifically want to run
-@pytest.mark.skip()
+@pytest.mark.skip(reason="Limited number of API calls allowed.")
 def test_get_food_terms():
     """Should get food terms from input text."""
     input1 = "Low - Carb Banana Pancakes"
