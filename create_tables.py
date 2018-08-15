@@ -47,7 +47,7 @@ results = Table("results", metadata,
      Column("id", BigInteger, primary_key=True, autoincrement=True),
      Column("publish_date", DateTime, nullable=False),
      Column("index_date", DateTime, nullable=False),
-     Column("url", String(150), nullable=False),
+     Column("url", String(300), nullable=False),
      Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False))
 
 
