@@ -112,8 +112,9 @@ def find_matches(food_term):
     results = client.execute_query(q)
 
     # add relevant information to dbs related to call
-    term_id = food_terms_record(food_term)[0]
-    make_searches_record(results.number_of_matches_total, term_id)
+    term_id = food_terms_record(food_term)
+    search_id = make_searches_record(results.number_of_matches_total, term_id)
+    process_blog_results(results, search_id)
 
     """
     `results` represents a result from a Query to the Search API
@@ -202,7 +203,7 @@ def food_terms_record(food_term):
         # execute insert statement
         result = conn.execute(ins)
         # result is ResultProxy object (analogous to the DBAPI cursor object)
-        term_id = result.inserted_primary_key
+        term_id = result.inserted_primary_key[0]
     except IntegrityError:
         # sqlalchemy wraps psycopg2.IntegrityError with its own exception
         # find the existing term's id
@@ -268,7 +269,10 @@ def make_searches_record(num_matches_total, term_id):
                                    num_matches_total=num_matches_total)
 
     # execute insert statement
-    conn.execute(ins)
+    result = conn.execute(ins)
+
+    # return the search's id
+    return result.inserted_primary_key[0]
 
 
 def get_time_stamp():
@@ -278,21 +282,7 @@ def get_time_stamp():
 
 
 #####################################################################
-def get_test_results(food_term):
-    """Do a Twingly API call, but do not log search information."""
-
-    # build query string
-    search_window = get_search_window()
-    q = build_twingly_query(food_term, "tspan:w")
-
-    # make the actual query
-    client = Client()
-    results = client.execute_query(q)
-
-    return results
-
-
-def process_blog_results(results, search_id=1):
+def process_blog_results(results, search_id=0):
     """Get desired data from blog search results.
 
     for every result:
@@ -301,6 +291,8 @@ def process_blog_results(results, search_id=1):
         extract food terms from title text (get_food_terms)
         build pairs
         add records to pairings table for each pair
+
+    search_id defaults to 0 (for testing) if not given.
     """
 
     # process results post by post
@@ -309,7 +301,6 @@ def process_blog_results(results, search_id=1):
         post_title = post.title
 
         # make a record in the results table
-        # SEARCH_ID ARGUMENT HARDCODED FOR NOW
         make_results_record(post, search_id)
 
         # extract food terms from title text?
