@@ -39,8 +39,7 @@ pairings = Table("pairings", metadata,
 searches = Table("searches", metadata,
      Column("id", BigInteger, primary_key=True, autoincrement=True),
      Column("user_timestamp", DateTime, nullable=False),
-     Column("search_window_start", DateTime, nullable=False),
-     Column("search_window_end", DateTime, nullable=False),
+     Column("search_window", String(10), nullable=False),
      Column("food_id", Integer, ForeignKey("food_terms.id"), nullable=False),
      Column("num_matches_total", Integer, nullable=False))
 

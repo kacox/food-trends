@@ -111,9 +111,9 @@ def find_matches(food_term):
     client = Client()
     results = client.execute_query(q)
 
-    # add relevant information to dbs
-    #update_food_terms(food_term)
-    #make_searches_record(results)
+    # add relevant information to dbs related to call
+    term_id = food_terms_record(food_term)[0]
+    make_searches_record(results.number_of_matches_total, term_id)
 
     """
     `results` represents a result from a Query to the Search API
@@ -170,9 +170,12 @@ def build_twingly_query(food_term, search_window):
             search_window)
 
 
+# PARTIALLY TESTED ABOVE LINE
 #####################################################################
-def update_food_terms(food_term):
+def food_terms_record(food_term):
     """Add a food term to the food_terms table if not there.
+
+    This function should run when new searches are made.
 
     Return the id of the inserted term.
     """
@@ -229,26 +232,43 @@ def get_term_id(food_term, table_obj, connection_obj):
     return result.fetchone()[0]
 
 
-#####################################################################
-def make_searches_record(results):
+def make_searches_record(num_matches_total, term_id):
     """Add a record to the searches table.
 
-    Fields to include: user_timestamp, search_window_start, search_window_end, 
-                        food_id, num_matches_total
+    Fields to include: user_timestamp, search_window, food_id, 
+                       num_matches_total
     """
-    # when a request is made to the Twingly endpoint (find_matches), run this
+    ### establish DB connection
+    from sqlalchemy import create_engine, Table, MetaData
 
+    # create engine(core interface to db)
+    engine = create_engine("postgresql:///food_trends", echo=False)
+
+    # make connection (object)
+    conn = engine.connect()
+
+    # reflect db object
+    metadata = MetaData()
+    searches = Table('searches', metadata, 
+                        autoload=True, autoload_with=engine)
+
+
+    ### get all the information you need to make a new searches record
     # grab time stamp (UTC)
     ts = get_time_stamp()
 
     # get search window (hard-coded for now)
     search_window = "tspan:w"
 
-    # get food id
+    ### make searches record and commit to db
+    # create insert statement (obj)
+    ins = searches.insert().values(user_timestamp=ts, 
+                                   search_window=search_window, 
+                                   food_id=term_id, 
+                                   num_matches_total=num_matches_total)
 
-    # pull number of total matches
-    # pull from results
-
+    # execute insert statement
+    conn.execute(ins)
 
 
 def get_time_stamp():
@@ -257,6 +277,7 @@ def get_time_stamp():
     return datetime.utcnow()
 
 
+#####################################################################
 def dissect_results(results):
     """Get desired data from search results.
 
