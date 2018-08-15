@@ -169,9 +169,13 @@ def build_twingly_query(food_term, search_window):
     return (food_term + " fields:title lang:en page-size:3 sort:created " + 
             search_window)
 
+
 #####################################################################
 def update_food_terms(food_term):
-    """Add a food term to the food_terms table if not there."""
+    """Add a food term to the food_terms table if not there.
+
+    Return the id of the inserted term.
+    """
     from sqlalchemy import create_engine, Table, MetaData
     from sqlalchemy.exc import IntegrityError
 
@@ -190,18 +194,42 @@ def update_food_terms(food_term):
     # format is 'INSERT INTO food_terms (id, term) VALUES (:id, :term)'
     ins = food_terms.insert().values(term=food_term.lower())
 
-    # execute insert statement
+    # insert if not in db; then get food term's id
     try:
+        # execute insert statement
         result = conn.execute(ins)
+        # result is ResultProxy object (analogous to the DBAPI cursor object)
+        term_id = result.inserted_primary_key
     except IntegrityError:
         # sqlalchemy wraps psycopg2.IntegrityError with its own exception
+        # find the existing term's id
         print("This food term is already in the table.")
-
-    # result is ResultProxy object (analogous to the DBAPI cursor object)
+        term_id = get_term_id(food_term=food_term.lower(), 
+                              table_obj=food_terms,
+                              connection_obj=conn)
 
     # release referenced DBAPI connection to the connection pool
     conn.close()
 
+    # return the id of the inserted term
+    return term_id
+
+
+def get_term_id(food_term, table_obj, connection_obj):
+    """Get and return the id of a given food term in the db."""
+    from sqlalchemy.sql import select
+
+    # create selection statement
+    selection = select([table_obj]).where(table_obj.c.term == food_term)
+
+    # execute selection statement
+    result = connection_obj.execute(selection)
+
+    # return the id
+    return result.fetchone()[0]
+
+
+#####################################################################
 def make_searches_record(results):
     """Add a record to the searches table.
 
@@ -211,10 +239,22 @@ def make_searches_record(results):
     # when a request is made to the Twingly endpoint (find_matches), run this
 
     # grab time stamp (UTC)
-    # get search window
+    ts = get_time_stamp()
+
+    # get search window (hard-coded for now)
+    search_window = "tspan:w"
+
     # get food id
+
     # pull number of total matches
-    pass
+    # pull from results
+
+
+
+def get_time_stamp():
+    """Get UTC timestamp."""
+    from datetime import datetime
+    return datetime.utcnow()
 
 
 def dissect_results(results):
