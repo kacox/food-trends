@@ -278,33 +278,96 @@ def get_time_stamp():
 
 
 #####################################################################
-def dissect_results(results):
-    """Get desired data from search results.
+def get_test_results(food_term):
+    """Do a Twingly API call, but do not log search information."""
+
+    # build query string
+    search_window = get_search_window()
+    q = build_twingly_query(food_term, "tspan:w")
+
+    # make the actual query
+    client = Client()
+    results = client.execute_query(q)
+
+    return results
+
+
+def process_blog_results(results, search_id=1):
+    """Get desired data from blog search results.
 
     for every result:
-        make an record in the results table
         get the title of that blog post
+        make a record in the results table
         extract food terms from title text (get_food_terms)
         build pairs
         add records to pairings table for each pair
     """
-    pass
+
+    # process results post by post
+    for post in results.posts:
+        # get the title of that blog post
+        post_title = post.title
+
+        # make a record in the results table
+        # SEARCH_ID ARGUMENT HARDCODED FOR NOW
+        make_results_record(post, search_id)
+
+        # extract food terms from title text?
+        pass
+
+        # build pairs
+        pass
+
+        # add record(s) to pairings table
+        pass
 
 
-def make_results_record():
+def make_results_record(post, search_id):
     """Add a record to the results table.
 
     Fields to include: publish_date, index_date, url, search_id
     """
-    pass
+    # extract data from post
+    publish_date, index_date, post_url = dissect_post(post)
+
+    # make and execute insert statement
+    from sqlalchemy import create_engine, Table, MetaData
+
+    # create engine(core interface to db)
+    engine = create_engine("postgresql:///food_trends", echo=False)
+
+    # make connection (object)
+    conn = engine.connect()
+
+    # reflect db object
+    metadata = MetaData()
+    results = Table('results', metadata, 
+                        autoload=True, autoload_with=engine)
+
+    # create insert statement (obj)
+    ins = results.insert().values(publish_date=publish_date, 
+                                   index_date=index_date, 
+                                   url=post_url, 
+                                   search_id=search_id)
+
+    # execute insert statement
+    conn.execute(ins)
 
 
-def extract_titles(search_results):
+def dissect_post(post):
+    """Get publish_date, index_date, and post_url from blog post.
+
+    Post object attributes:
+        published_at  (datetime.datetime)
+        indexed_at    (datetime.datetime)
+        url           (string)
     """
-    Parse titles out of each result in search results. Return titles as a 
-    list?
-    """
-    pass
+    return post.published_at, post.indexed_at, post.url
+
+
+
+
+
 
 
 def build_pairs(original_term, food_terms):
