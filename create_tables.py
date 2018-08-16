@@ -34,7 +34,8 @@ pairings = Table("pairings", metadata,
      Column("pairing_id", BigInteger, primary_key=True, autoincrement=True),
      Column("food_id1", Integer, ForeignKey("food_terms.id"), nullable=False),
      Column("food_id2", Integer, ForeignKey("food_terms.id"), nullable=False),
-     Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False))
+     Column("search_id", BigInteger, ForeignKey("searches.id"), nullable=False), 
+     Column("occurences", Integer, nullable=False))
 
 searches = Table("searches", metadata,
      Column("id", BigInteger, primary_key=True, autoincrement=True),
