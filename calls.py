@@ -114,7 +114,7 @@ def find_matches(food_term):
     # add relevant information to dbs related to call
     term_id = food_terms_record(food_term)
     search_id = make_searches_record(results.number_of_matches_total, term_id)
-    process_blog_results(results, search_id)
+    process_blog_results(results, search_id, food_term)
 
     """
     `results` represents a result from a Query to the Search API
@@ -128,7 +128,6 @@ def find_matches(food_term):
         posts (list of Post):
                 all Posts that matched the Query; list of Post objects
     """
-    return results
 
 
 def get_search_window():
@@ -281,8 +280,7 @@ def get_time_stamp():
     return datetime.utcnow()
 
 
-#####################################################################
-def process_blog_results(results, search_id=0):
+def process_blog_results(results, search_id, search_term):
     """Get desired data from blog search results.
 
     for every result:
@@ -297,20 +295,33 @@ def process_blog_results(results, search_id=0):
 
     # process results post by post
     for post in results.posts:
-        # get the title of that blog post
-        post_title = post.title
-
         # make a record in the results table
         make_results_record(post, search_id)
 
-        # extract food terms from title text?
-        pass
+        # get the title of that blog post
+        post_title = post.title
 
-        # build pairs
-        pass
+        # extract food terms from title text
+        # THIS IS THE 3RD AND FINAL ROUND OF API CALLS
+        # BUILD OUT PAIRING MECHANISM FIRST (BELOW)
+        other_terms = get_food_terms(post_title, MASHAPE_KEY)
 
-        # add record(s) to pairings table
-        pass
+        # clean terms so that search term is not in other terms
+        if search_term in other_terms:
+            other_terms.remove(search_term)
+
+        print(post_title)
+        print(other_terms, "\n")
+        # take the food terms extracted from post title and update other 
+        # terms dict (other terms, count)
+
+
+    # other terms dict now has info from all blog posts from this search_id
+    # make pairs; add pairings record for each to db
+    # build_pairs(search_term, search_id, other_terms)
+
+    # add record(s) to pairings table
+    pass
 
 
 def make_results_record(post, search_id):
@@ -356,19 +367,22 @@ def dissect_post(post):
     return post.published_at, post.indexed_at, post.url
 
 
+test1 = ["caramel", "ginger"]
+test2 = ["scone", "lavender", "vanilla"]
+test3 = ["honey", "buckwheat", "cinnamon", "apple"]
 
 
+def build_pairs(search_term, search_id, other_terms):
+    """Create pairings and put each in database.
 
-
-
-def build_pairs(original_term, food_terms):
-    """Find all possible food term pair combinations.
-
-    Return as a list of tuples?
+    SEE PROCESS_BLOG_RESULTS (THIS IS CALLED THERE)
     """
-    pass
+    # for other_term, count in other_terms.items():
+        # pairing = (search_term, other_term)
+        # make a record in the pairings table -- make_pairings_record()
 
 
+#####################################################################
 def make_pairings_record():
     """Add a record to the pairings table.
 
