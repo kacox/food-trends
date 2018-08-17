@@ -17,3 +17,7 @@ The core feature of this application (MVP):
 
 For example, if you searched "matcha", you would see that it frequently occurs 
 with the term "tea" and "latte".
+
+__APIs__
+Spoonacular Ingredient and Nutrition API
+Twingly Blog Search API
