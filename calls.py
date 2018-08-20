@@ -89,7 +89,8 @@ def get_final_term(terms_list):
     return terms_list[user_choice]
 
 
-#### I DO NOT HAVE ACCESS TO THIS API RIGHT NOW; USE MOCK FOR DEV
+#####################################################################
+#### I HAVE LIMITED ACCESS TO THIS API; USE MOCK FOR DEV
 def find_matches(food_term="carrot"):
     """
     Make call to Twingly Blog Search API. Search blog post TITLES using the 
@@ -109,7 +110,7 @@ def find_matches(food_term="carrot"):
     # client = Client()
     # results = client.execute_query(q)
 
-    # FAKE API CALL UNTIL I HAVE ACCESS AGAIN
+    # FAKE API CALL
     import mock_twingly
     results = mock_twingly.mock_api_call()
 
@@ -132,7 +133,6 @@ def find_matches(food_term="carrot"):
     """
 
     
-
 def get_search_window():
     """
     Determine search window time period for next call to Twingly.
