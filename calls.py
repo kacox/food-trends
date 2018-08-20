@@ -98,7 +98,7 @@ def get_final_term(terms_list):
 
 
 #### I DO NOT HAVE ACCESS TO THIS API RIGHT NOW; USE MOCK FOR DEV
-def find_matches(food_term):
+def find_matches(food_term="carrot"):
     """
     Make call to Twingly Blog Search API. Search blog post TITLES using the 
     food term from get_food_term().
@@ -122,10 +122,8 @@ def find_matches(food_term):
     results = mock_twingly.mock_api_call()
 
     # add relevant information to dbs related to call
-    ##term_id = food_terms_record(food_term)
-    ##search_id = make_searches_record(results.number_of_matches_total, term_id)
-    term_id = 0
-    search_id = 0
+    term_id = food_terms_record(food_term)
+    search_id = make_searches_record(results.number_of_matches_total, term_id)
     process_blog_results(results, search_id, food_term)
 
     """
@@ -401,36 +399,27 @@ def build_pairs(search_term, search_id, other_terms_dict):
 
     for other_term, count in other_terms_dict.items():
         ### make a record in the pairings table
-        
+
         # get the id for the food term from food_terms (add if not there)
         other_term_id = food_terms_record(other_term)
 
-        print("food_id1=", search_term_id, 
-           "\nfood_id2=", other_term_id, 
-           "\nsearch_id=", search_id, 
-           "\noccurences=", count)
-
-    #     # create insert statement (obj)
-    #     ins = pairings.insert().values(food_id1=search_term_id, 
-    #                                    food_id2=other_term, 
-    #                                    search_id=search_id, 
-    #                                    occurences=count)
-
-    #     # execute insert statement
-    #     conn.execute(ins)
-
-    #     # for testing
-    #     print(str(ins))
+        # put pairings record in db
+        make_pairings_record(conn, pairings, search_term_id, other_term_id, 
+                                                    search_id, count)
 
 
+def make_pairings_record(connection_obj, pairings, search_term_id, 
+                                    other_term_id, search_id, count):
+    """Add a record to the pairings table."""
 
+    # create insert statement (obj)
+    ins = pairings.insert().values(food_id1=search_term_id, 
+                                   food_id2=other_term_id, 
+                                   search_id=search_id, 
+                                   occurences=count)
 
-def make_pairings_record():
-    """Add a record to the pairings table.
-
-    Fields to include: food_id1, food_id2, search_id
-    """
-    pass
+    # execute insert statement
+    connection_obj.execute(ins)
 
 
 #####################################################################
