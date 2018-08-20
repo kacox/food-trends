@@ -5,7 +5,12 @@ import os
 import requests
 import json
 
+from sqlalchemy import Table, MetaData
+from sqlalchemy.sql import select
+from sqlalchemy.exc import IntegrityError
 from twingly_search import Client
+
+from connector import engine
 
 
 # get api key from envionment variables
@@ -117,8 +122,10 @@ def find_matches(food_term):
     results = mock_twingly.mock_api_call()
 
     # add relevant information to dbs related to call
-    term_id = food_terms_record(food_term)
-    search_id = make_searches_record(results.number_of_matches_total, term_id)
+    ##term_id = food_terms_record(food_term)
+    ##search_id = make_searches_record(results.number_of_matches_total, term_id)
+    term_id = 0
+    search_id = 0
     process_blog_results(results, search_id, food_term)
 
     """
@@ -185,11 +192,6 @@ def food_terms_record(food_term):
 
     Return the id of the inserted term.
     """
-    from sqlalchemy import create_engine, Table, MetaData
-    from sqlalchemy.exc import IntegrityError
-
-    # create engine(core interface to db)
-    engine = create_engine("postgresql:///food_trends", echo=False)
 
     # make connection (object)
     conn = engine.connect()
@@ -217,16 +219,12 @@ def food_terms_record(food_term):
                               table_obj=food_terms,
                               connection_obj=conn)
 
-    # release referenced DBAPI connection to the connection pool
-    conn.close()
-
     # return the id of the inserted term
     return term_id
 
 
 def get_term_id(food_term, table_obj, connection_obj):
     """Get and return the id of a given food term in the db."""
-    from sqlalchemy.sql import select
 
     # create selection statement
     selection = select([table_obj]).where(table_obj.c.term == food_term)
@@ -245,10 +243,6 @@ def make_searches_record(num_matches_total, term_id):
                        num_matches_total
     """
     ### establish DB connection
-    from sqlalchemy import create_engine, Table, MetaData
-
-    # create engine(core interface to db)
-    engine = create_engine("postgresql:///food_trends", echo=False)
 
     # make connection (object)
     conn = engine.connect()
@@ -304,7 +298,7 @@ def process_blog_results(results, search_id, search_term):
     # process results post by post
     for post in results.posts:
         # make a record in the results table
-        make_results_record(post, search_id)
+        ##make_results_record(post, search_id)
 
         # get the title of that blog post
         post_title = post.title
@@ -318,8 +312,8 @@ def process_blog_results(results, search_id, search_term):
         if search_term in other_terms:
             other_terms.remove(search_term)
 
-        print(post_title)
-        print(other_terms, "\n")
+        #print(post_title)
+        #print(other_terms, "\n")
 
         # take food terms extracted from post and update dict
         for term in other_terms:
@@ -331,11 +325,11 @@ def process_blog_results(results, search_id, search_term):
                 other_terms_dict[term] = 1
 
 
-    print(other_terms_dict, "\n")
+    #print(other_terms_dict, "\n")
     # other terms dict now has info from all blog posts from this search_id
     # make pairs; add pairings record for each to db ONLY IF NOT EMPTY
-    # if other_terms_dict != {}:
-    #     build_pairs(search_term, search_id, other_terms_dict)
+    if other_terms_dict != {}:
+        build_pairs(search_term, search_id, other_terms_dict)
 
 
 
@@ -348,10 +342,6 @@ def make_results_record(post, search_id):
     publish_date, index_date, post_url = dissect_post(post)
 
     # make and execute insert statement
-    from sqlalchemy import create_engine, Table, MetaData
-
-    # create engine(core interface to db)
-    engine = create_engine("postgresql:///food_trends", echo=False)
 
     # make connection (object)
     conn = engine.connect()
@@ -362,7 +352,7 @@ def make_results_record(post, search_id):
                         autoload=True, autoload_with=engine)
 
     # check if post_url is already in the db
-    from sqlalchemy.sql import select
+
     selection = select([results]).where(results.c.url == post_url)
     selection_result = conn.execute(selection)
 
@@ -391,50 +381,46 @@ def dissect_post(post):
     return post.published_at, post.indexed_at, post.url
 
 
-# def build_pairs(search_term, search_id, other_terms_dict):
-#     """Create pairings and put each in database."""
+def build_pairs(search_term, search_id, other_terms_dict):
+    """Create pairings and put each in database."""
 
-#     # SQLAlchemy imports
-#     from sqlalchemy import create_engine, Table, MetaData
-#     from sqlalchemy.sql import select
+    # make connection (object)
+    conn = engine.connect()
 
-#     # create engine(core interface to db)
-#     engine = create_engine("postgresql:///food_trends", echo=False)
+    # reflect db objects
+    metadata_pairings = MetaData()
+    pairings = Table('pairings', metadata_pairings, 
+                        autoload=True, autoload_with=engine)
 
-#     # make connection (object)
-#     conn = engine.connect()
+    metadata_food_terms = MetaData()
+    food_terms = Table('food_terms', metadata_food_terms, 
+                        autoload=True, autoload_with=engine)
 
-#     # reflect db object
-#     metadata_pairings = MetaData()
-#     pairings = Table('pairings', metadata_pairings, 
-#                         autoload=True, autoload_with=engine)
+    # get id of search term
+    search_term_id = get_term_id(search_term, food_terms, conn)
 
-#     # get id of search term
-#     metadata_food_terms = MetaData()
-#     food_terms = Table('food_terms', metadata_food_terms, 
-#                         autoload=True, autoload_with=engine)
+    for other_term, count in other_terms_dict.items():
+        ### make a record in the pairings table
+        
+        # get the id for the food term from food_terms (add if not there)
+        other_term_id = food_terms_record(other_term)
 
-#     print("BEFORE GET ID")
-#     search_term_id = get_term_id(search_term, food_terms, conn)
+        print("food_id1=", search_term_id, 
+           "\nfood_id2=", other_term_id, 
+           "\nsearch_id=", search_id, 
+           "\noccurences=", count)
 
+    #     # create insert statement (obj)
+    #     ins = pairings.insert().values(food_id1=search_term_id, 
+    #                                    food_id2=other_term, 
+    #                                    search_id=search_id, 
+    #                                    occurences=count)
 
-#     for other_term, count in other_terms_dict.items():
-#         ### make a record in the pairings table
-#         # get the id for the food term from food_terms; add entry if not 
-#         # already there
-#         other_term_id = get_term_id(other_term, food_terms, conn)
+    #     # execute insert statement
+    #     conn.execute(ins)
 
-#         # create insert statement (obj)
-#         ins = pairings.insert().values(food_id1=search_term_id, 
-#                                        food_id2=other_term, 
-#                                        search_id=search_id, 
-#                                        occurences=count)
-
-#         # execute insert statement
-#         conn.execute(ins)
-
-#         # for testing
-#         print(str(ins))
+    #     # for testing
+    #     print(str(ins))
 
 
 
