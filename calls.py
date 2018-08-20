@@ -92,6 +92,7 @@ def get_final_term(terms_list):
     return terms_list[user_choice]
 
 
+#### I DO NOT HAVE ACCESS TO THIS API RIGHT NOW; USE MOCK FOR DEV
 def find_matches(food_term):
     """
     Make call to Twingly Blog Search API. Search blog post TITLES using the 
@@ -103,13 +104,17 @@ def find_matches(food_term):
     past week while developing.
     """
 
-    # build query string
-    search_window = get_search_window()
-    q = build_twingly_query(food_term, search_window)
+    # # build query string
+    # search_window = get_search_window()
+    # q = build_twingly_query(food_term, search_window)
 
-    # make the actual query
-    client = Client()
-    results = client.execute_query(q)
+    # # make the actual query
+    # client = Client()
+    # results = client.execute_query(q)
+
+    # FAKE API CALL UNTIL I HAVE ACCESS AGAIN
+    import mock_twingly
+    results = mock_twingly.mock_api_call()
 
     # add relevant information to dbs related to call
     term_id = food_terms_record(food_term)
@@ -129,6 +134,7 @@ def find_matches(food_term):
                 all Posts that matched the Query; list of Post objects
     """
 
+    
 
 def get_search_window():
     """
@@ -292,6 +298,8 @@ def process_blog_results(results, search_id, search_term):
 
     search_id defaults to 0 (for testing) if not given.
     """
+    # init dict for other food terms (not the search term)
+    other_terms_dict = {}
 
     # process results post by post
     for post in results.posts:
@@ -306,22 +314,29 @@ def process_blog_results(results, search_id, search_term):
         # BUILD OUT PAIRING MECHANISM FIRST (BELOW)
         other_terms = get_food_terms(post_title, MASHAPE_KEY)
 
-        # clean terms so that search term is not in other terms
+        # clean so that search term is not in other_terms
         if search_term in other_terms:
             other_terms.remove(search_term)
 
         print(post_title)
         print(other_terms, "\n")
-        # take the food terms extracted from post title and update other 
-        # terms dict (other terms, count)
+
+        # take food terms extracted from post and update dict
+        for term in other_terms:
+            if term in other_terms_dict.keys():
+                # increment count
+                other_terms_dict[term] += 1
+            else:
+                # new entry
+                other_terms_dict[term] = 1
 
 
+    print(other_terms_dict, "\n")
     # other terms dict now has info from all blog posts from this search_id
-    # make pairs; add pairings record for each to db
-    # build_pairs(search_term, search_id, other_terms)
+    # make pairs; add pairings record for each to db ONLY IF NOT EMPTY
+    # if other_terms_dict != {}:
+    #     build_pairs(search_term, search_id, other_terms_dict)
 
-    # add record(s) to pairings table
-    pass
 
 
 def make_results_record(post, search_id):
@@ -367,22 +382,54 @@ def dissect_post(post):
     return post.published_at, post.indexed_at, post.url
 
 
-test1 = ["caramel", "ginger"]
-test2 = ["scone", "lavender", "vanilla"]
-test3 = ["honey", "buckwheat", "cinnamon", "apple"]
+# def build_pairs(search_term, search_id, other_terms_dict):
+#     """Create pairings and put each in database."""
+
+#     # SQLAlchemy imports
+#     from sqlalchemy import create_engine, Table, MetaData
+#     from sqlalchemy.sql import select
+
+#     # create engine(core interface to db)
+#     engine = create_engine("postgresql:///food_trends", echo=False)
+
+#     # make connection (object)
+#     conn = engine.connect()
+
+#     # reflect db object
+#     metadata_pairings = MetaData()
+#     pairings = Table('pairings', metadata_pairings, 
+#                         autoload=True, autoload_with=engine)
+
+#     # get id of search term
+#     metadata_food_terms = MetaData()
+#     food_terms = Table('food_terms', metadata_food_terms, 
+#                         autoload=True, autoload_with=engine)
+
+#     print("BEFORE GET ID")
+#     search_term_id = get_term_id(search_term, food_terms, conn)
 
 
-def build_pairs(search_term, search_id, other_terms):
-    """Create pairings and put each in database.
+#     for other_term, count in other_terms_dict.items():
+#         ### make a record in the pairings table
+#         # get the id for the food term from food_terms; add entry if not 
+#         # already there
+#         other_term_id = get_term_id(other_term, food_terms, conn)
 
-    SEE PROCESS_BLOG_RESULTS (THIS IS CALLED THERE)
-    """
-    # for other_term, count in other_terms.items():
-        # pairing = (search_term, other_term)
-        # make a record in the pairings table -- make_pairings_record()
+#         # create insert statement (obj)
+#         ins = pairings.insert().values(food_id1=search_term_id, 
+#                                        food_id2=other_term, 
+#                                        search_id=search_id, 
+#                                        occurences=count)
+
+#         # execute insert statement
+#         conn.execute(ins)
+
+#         # for testing
+#         print(str(ins))
 
 
-#####################################################################
+
+
 def make_pairings_record():
     """Add a record to the pairings table.
 
@@ -391,6 +438,7 @@ def make_pairings_record():
     pass
 
 
+#####################################################################
 if __name__ == "__main__":
     """
     If run with 'make_request' and a filepath as addn'l CL arguments, then 
