@@ -361,14 +361,23 @@ def make_results_record(post, search_id):
     results = Table('results', metadata, 
                         autoload=True, autoload_with=engine)
 
-    # create insert statement (obj)
-    ins = results.insert().values(publish_date=publish_date, 
-                                   index_date=index_date, 
-                                   url=post_url, 
-                                   search_id=search_id)
+    # check if post_url is already in the db
+    from sqlalchemy.sql import select
+    selection = select([results]).where(results.c.url == post_url)
+    selection_result = conn.execute(selection)
 
-    # execute insert statement
-    conn.execute(ins)
+    # prevent redundant URLs in table
+    if not selection_result:
+        # new url not already in results; add record to results
+
+        # create insert statement (obj)
+        ins = results.insert().values(publish_date=publish_date, 
+                                       index_date=index_date, 
+                                       url=post_url, 
+                                       search_id=search_id)
+
+        # execute insert statement
+        conn.execute(ins)
 
 
 def dissect_post(post):
