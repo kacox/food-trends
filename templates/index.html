@@ -9,5 +9,23 @@
 {% endblock %}
 
 {% block main %}
-  Welcome to Food Trends!
+  <p>Welcome to Food Trends! This application lets you discover popular 
+  ingredient pairings in the blogosphere. It is intended for food bloggers, 
+  writers, recipe developers, and foodies looking to tap into current food 
+  trends.</p>
+
+  <p>
+    <form method="POST" action="/">
+
+      <strong>What is paired with...?</strong>
+
+      {# CSRF protection #}
+      {{ form.hidden_tag() }}
+
+      <p>{{ form.user_query.label }} {{ form.user_query }}</p>
+
+      <p>{{ form.submit() }}</p>
+
+    </form>
+  </p>
 {% endblock %}
