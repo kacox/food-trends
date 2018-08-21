@@ -17,6 +17,8 @@ APP_KEY = os.environ.get("APP_KEY")
 
 # create app instance
 app = Flask(__name__)
+
+# session enabling and CSRF protection
 app.config['SECRET_KEY'] = APP_KEY
 
 
