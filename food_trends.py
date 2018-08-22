@@ -6,7 +6,7 @@ to the database.
 """
 
 # imports
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, url_for, flash
 
 from db import connect_to_db
 import forms
@@ -38,6 +38,10 @@ def index():
         
 
     # Form not submitted; no data; back to original page
+    if form.errors:
+        # if there are any validation errors
+        for error in form.errors["user_query"]:
+            flash(error)
     return render_template("index.html", form=form)
 
 

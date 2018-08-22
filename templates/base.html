@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
 
+    <link rel="stylesheet" type="text/css" href="static/styles.css">
     
     <title>
       {% block title %}
@@ -10,6 +11,13 @@
       {% endblock %}
     </title>
     
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <p class="flash-msg">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
   </head>
 

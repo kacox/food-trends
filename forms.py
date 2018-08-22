@@ -19,7 +19,7 @@ def validate_characters(form, field):
     for word in cleaned_query:
         if not word.isalpha() or "'" in word:
             # invalid query
-            raise validators.ValidationError('Only letters and apostrophe allowed')
+            raise validators.ValidationError('Only letters and apostrophes allowed')
 
 
 class QueryForm(FlaskForm):
