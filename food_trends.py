@@ -8,9 +8,12 @@ to the database.
 # imports
 from flask import Flask, render_template, redirect, request, url_for, flash
 
-from db import connect_to_db
 import forms
 import os
+
+from db import connect_to_db
+import calls
+
 
 # get secret key
 APP_KEY = os.environ.get("APP_KEY")
@@ -32,9 +35,9 @@ def index():
         # Successful POST request; take data
         query = form.user_query.data
 
-        # give results to backend function
-        # for now, display a fake result
-        return redirect(url_for("display_search"))
+        # give results to backend function (for now, display placeholder)
+        # second arg for url_for is sent as GET request
+        return redirect(url_for("display_search", srch_query=query))
         
 
     # Form not submitted; no data; back to original page
@@ -42,12 +45,22 @@ def index():
         # if there are any validation errors
         for error in form.errors["user_query"]:
             flash(error)
+
     return render_template("index.html", form=form)
 
 
 @app.route("/search-results", methods=["GET", "POST"])
 def display_search():
-    return "<h1>!!</h1>"
+    # get the user's query string
+    query = request.args['srch_query']
+
+    # make request to Spoonacular (find food terms in user query)
+    parsed_terms = calls.get_food_terms(query, calls.MASHAPE_KEY)
+
+    # results
+    return render_template("results.html", 
+                            header_text=query, 
+                            results=parsed_terms)
 
 
 #####################################################################
