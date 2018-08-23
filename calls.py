@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from twingly_search import Client
 
 from connector import engine
-
+import mock_spoonacular
 
 # get api key from envionment variables
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
@@ -26,21 +26,24 @@ def get_food_terms(input_text, api_key):
     Return list of food terms (dupes removed).
     """
     
-    # check that you have the API key
-    if api_key:
-        # assign request arguments
-        endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
-        payload = {"text": input_text}
-        headers = {"X-Mashape-Key": api_key,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Accept": "application/json"}
+    # # check that you have the API key
+    # if api_key:
+    #     # assign request arguments
+    #     endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
+    #     payload = {"text": input_text}
+    #     headers = {"X-Mashape-Key": api_key,
+    #                 "Content-Type": "application/x-www-form-urlencoded",
+    #                 "Accept": "application/json"}
 
-        # make request
-        r = requests.post(endpoint_url, data=payload, headers=headers)
+    #     # make request
+    #     r = requests.post(endpoint_url, data=payload, headers=headers)
         
-    # extract food terms from response
-    response_content = json.loads(r.text)
-    return terms_from_response(response_content)
+    # # extract food terms from response
+    # response_content = json.loads(r.text)
+    # return terms_from_response(response_content)
+
+    # MOCK RESPONSE FOR NOW
+    return mock_spoonacular.mock_get_food_terms(input_text)
 
 
 def terms_from_response(response_content):
