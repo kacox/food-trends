@@ -7,12 +7,13 @@ to the database.
 
 # imports
 from flask import Flask, render_template, redirect, request, url_for, flash
+from flask import jsonify
 
-import forms
 import os
 
 from db import connect_to_db
 import calls
+import forms
 
 
 # get secret key
@@ -68,11 +69,16 @@ def display_search():
 
 @app.route("/search", methods=["GET", "POST"])
 def search_blogs():
+    # get final term depending on request type
     if request.method == "GET":
-        return request.args.get("choice")
+        final_term = request.args.get("choice")
     else:
-        return request.form.get("choice")
-    
+        # query had more than one choice; narrowed to one now
+        final_term = request.form.get("choice")
+
+    # hard-coded to "carrot" right now; change to final_term later
+    results_dict = jsonify(calls.find_matches())
+    return results_dict
 
 
 #####################################################################

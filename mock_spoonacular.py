@@ -23,24 +23,16 @@ Sample responses and file location:
     'classic peanut butter pie' > sample_responses/spoonacular_pbpie.txt
     'chocolate chip cookies' > sample_responses/spoonacular_cccookies.txt
     'lavender scones' > sample_responses/spoonacular_lav_scones.txt
+    'classic carrot cake' > sample_responses/spoonacular_ccarrotcake.txt
 """
 
 import json
 
 
-QUERY_FILE_MAP = {"classic peanut butter pie": 
-                            "sample_responses/spoonacular_pbpie.txt",
-                  "chocolate chip cookies": 
-                            "sample_responses/spoonacular_cccookies.txt",
-                  "lavender scones": 
-                            "sample_responses/spoonacular_lav_scones.txt",
-                  "cardamom": "sample_responses/spoonacular_cardamom.txt"}
-
-
 def get_response_text(user_query):
     """Get the payload of the response as text."""
     # get the filepath associated with the user query
-    filepath = QUERY_FILE_MAP[user_query]
+    filepath = "sample_responses/spoonacular_ccarrotcake.txt"
 
     # open and read in as string
     with open(filepath, "r") as f:
@@ -71,11 +63,6 @@ def mock_get_food_terms(user_query):
 
     Return list of food terms (dupes removed).
     """
-    # make sure user query is one of three available
-    if user_query not in QUERY_FILE_MAP.keys():
-        # default to "classic peanut butter pie"
-        user_query = "classic peanut butter pie"
-    
     # open and extract data from file
     response_text = get_response_text(user_query)
         

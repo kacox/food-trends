@@ -26,24 +26,24 @@ def get_food_terms(input_text, api_key):
     Return list of food terms (dupes removed).
     """
     
-    # # check that you have the API key
-    # if api_key:
-    #     # assign request arguments
-    #     endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
-    #     payload = {"text": input_text}
-    #     headers = {"X-Mashape-Key": api_key,
-    #                 "Content-Type": "application/x-www-form-urlencoded",
-    #                 "Accept": "application/json"}
+    # check that you have the API key
+    if api_key:
+        # assign request arguments
+        endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
+        payload = {"text": input_text}
+        headers = {"X-Mashape-Key": api_key,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"}
 
-    #     # make request
-    #     r = requests.post(endpoint_url, data=payload, headers=headers)
+        # make request
+        r = requests.post(endpoint_url, data=payload, headers=headers)
         
-    # # extract food terms from response
-    # response_content = json.loads(r.text)
-    # return terms_from_response(response_content)
+    # extract food terms from response
+    response_content = json.loads(r.text)
+    return terms_from_response(response_content)
 
-    # MOCK RESPONSE FOR NOW
-    return mock_spoonacular.mock_get_food_terms(input_text)
+    # MOCK RESPONSE FOR DEV
+    #return mock_spoonacular.mock_get_food_terms(input_text)
 
 
 def terms_from_response(response_content):
@@ -101,8 +101,7 @@ def find_matches(food_term="carrot"):
 
     Need to build a query (see below functions).
 
-    Return results (list of Post objects); limited to 3 Posts within the 
-    past week while developing.
+    Return dictionary with pairing matches.
     """
 
     # # build query string
@@ -120,7 +119,7 @@ def find_matches(food_term="carrot"):
     # add relevant information to dbs related to call
     term_id = food_terms_record(food_term)
     search_id = make_searches_record(results.number_of_matches_total, term_id)
-    process_blog_results(results, search_id, food_term)
+    return process_blog_results(results, search_id, food_term)
 
     """
     `results` represents a result from a Query to the Search API
@@ -323,6 +322,9 @@ def process_blog_results(results, search_id, search_term):
     # make pairs; add pairings record for each to db ONLY IF NOT EMPTY
     if other_terms_dict != {}:
         build_pairs(search_term, search_id, other_terms_dict)
+
+    # return results
+    return other_terms_dict
 
 
 
