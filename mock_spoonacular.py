@@ -33,7 +33,8 @@ QUERY_FILE_MAP = {"classic peanut butter pie":
                   "chocolate chip cookies": 
                             "sample_responses/spoonacular_cccookies.txt",
                   "lavender scones": 
-                            "sample_responses/spoonacular_lav_scones.txt"}
+                            "sample_responses/spoonacular_lav_scones.txt",
+                  "cardamom": "sample_responses/spoonacular_cardamom.txt"}
 
 
 def get_response_text(user_query):

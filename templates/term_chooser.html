@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Food Trends
+{% endblock %}
+
+{% block heading %}
+  Which food term did you mean?
+{% endblock %}
+
+{% block main %}
+  <p>
+    <form method="POST" action="/search">
+
+      <strong>You search for "{{ header_text }}".</strong>
+
+      <p>
+        <!-- Put the term choices here -->
+        {% for result in results %}
+          <input type="radio" name="choice" value="{{ result }}"> {{ result }}<br>
+        {% endfor %}
+        <br>
+        <input type="submit" value="Choose term">
+    </p>
+
+    </form>
+  </p>
+{% endblock %}

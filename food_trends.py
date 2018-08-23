@@ -49,18 +49,27 @@ def index():
     return render_template("index.html", form=form)
 
 
-@app.route("/search-results", methods=["GET", "POST"])
+@app.route("/verify-term", methods=["GET", "POST"])
 def display_search():
     # get the user's query string
-    query = request.args['srch_query']
+    query = request.args.get("srch_query")
 
     # make request to Spoonacular (find food terms in user query)
     parsed_terms = calls.get_food_terms(query, calls.MASHAPE_KEY)
 
-    # results
-    return render_template("results.html", 
-                            header_text=query, 
-                            results=parsed_terms)
+    # if more than one let user pick
+    if len(parsed_terms) > 1:
+        return render_template("term_chooser.html", 
+                                header_text=query, 
+                                results=parsed_terms)
+    else:
+        return redirect(url_for("search_blogs", choice=parsed_terms[0]))
+
+
+@app.route("/search", methods=["GET", "POST"])
+def search_blogs():
+    return request.args.get("choice")
+    
 
 
 #####################################################################
