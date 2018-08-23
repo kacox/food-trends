@@ -68,7 +68,10 @@ def display_search():
 
 @app.route("/search", methods=["GET", "POST"])
 def search_blogs():
-    return request.args.get("choice")
+    if request.method == "GET":
+        return request.args.get("choice")
+    else:
+        return request.form.get("choice")
     
 
 
