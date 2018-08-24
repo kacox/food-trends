@@ -118,7 +118,9 @@ def find_matches(food_term="carrot"):
 
     # add relevant information to dbs related to call
     term_id = food_terms_record(food_term)
-    search_id = make_searches_record(results.number_of_matches_total, term_id)
+    search_id = make_searches_record(results.number_of_matches_total, 
+                                        results.number_of_matches_returned,
+                                        term_id)
     return process_blog_results(results, search_id, food_term)
 
     """
@@ -228,11 +230,11 @@ def get_term_id(food_term, table_obj, connection_obj):
     return result.fetchone()[0]
 
 
-def make_searches_record(num_matches_total, term_id):
+def make_searches_record(num_matches_total, num_matches_returned, term_id):
     """Add a record to the searches table.
 
     Fields to include: user_timestamp, search_window, food_id, 
-                       num_matches_total
+                       num_matches_total, num_matches_returned
     """
     ### establish DB connection
 
@@ -257,7 +259,8 @@ def make_searches_record(num_matches_total, term_id):
     ins = searches.insert().values(user_timestamp=ts, 
                                    search_window=search_window, 
                                    food_id=term_id, 
-                                   num_matches_total=num_matches_total)
+                                   num_matches_total=num_matches_total,
+                                   num_matches_returned=num_matches_returned)
 
     # execute insert statement
     result = conn.execute(ins)
