@@ -4,6 +4,7 @@
 import os
 import requests
 import json
+from datetime import datetime
 
 from sqlalchemy import Table, MetaData
 from sqlalchemy.sql import select
@@ -163,10 +164,8 @@ def get_search_window():
         how it would look in a final query string:        
         `q = 'github page-size: 10 lang:sv tspan:24h'`
     """
-    # hard-coded for now
+    # hard-coded for now; may change in future
     search_window = "w"
-
-    # return piece to be used in final query
     return "tspan:" + search_window
 
 
@@ -195,38 +194,30 @@ def food_terms_record(food_term):
     food_terms = Table('food_terms', metadata, 
                         autoload=True, autoload_with=engine)
 
-    # make insert statement (object)
     # format is 'INSERT INTO food_terms (id, term) VALUES (:id, :term)'
     ins = food_terms.insert().values(term=food_term.lower())
 
     # insert if not in db; then get food term's id
     try:
-        # execute insert statement
         result = conn.execute(ins)
         # result is ResultProxy object (analogous to the DBAPI cursor object)
         term_id = result.inserted_primary_key[0]
     except IntegrityError:
         # sqlalchemy wraps psycopg2.IntegrityError with its own exception
-        # find the existing term's id
         print("This food term is already in the table.")
         term_id = get_term_id(food_term=food_term.lower(), 
                               table_obj=food_terms,
                               connection_obj=conn)
 
-    # return the id of the inserted term
     return term_id
 
 
 def get_term_id(food_term, table_obj, connection_obj):
     """Get and return the id of a given food term in the db."""
 
-    # create selection statement
     selection = select([table_obj]).where(table_obj.c.term == food_term)
-
-    # execute selection statement
     result = connection_obj.execute(selection)
 
-    # return the id
     return result.fetchone()[0]
 
 
@@ -236,7 +227,6 @@ def make_searches_record(num_matches_total, num_matches_returned, term_id):
     Fields to include: user_timestamp, search_window, food_id, 
                        num_matches_total, num_matches_returned
     """
-    ### establish DB connection
 
     # make connection (object)
     conn = engine.connect()
@@ -248,31 +238,20 @@ def make_searches_record(num_matches_total, num_matches_returned, term_id):
 
 
     ### get all the information you need to make a new searches record
-    # grab time stamp (UTC)
-    ts = get_time_stamp()
+    ts = datetime.utcnow()
 
     # get search window (hard-coded for now)
     search_window = "tspan:w"
 
     ### make searches record and commit to db
-    # create insert statement (obj)
     ins = searches.insert().values(user_timestamp=ts, 
                                    search_window=search_window, 
                                    food_id=term_id, 
                                    num_matches_total=num_matches_total,
                                    num_matches_returned=num_matches_returned)
-
-    # execute insert statement
     result = conn.execute(ins)
 
-    # return the search's id
     return result.inserted_primary_key[0]
-
-
-def get_time_stamp():
-    """Get UTC timestamp."""
-    from datetime import datetime
-    return datetime.utcnow()
 
 
 def process_blog_results(results, search_id, search_term):
@@ -287,15 +266,13 @@ def process_blog_results(results, search_id, search_term):
 
     search_id defaults to 0 (for testing) if not given.
     """
-    # init dict for other food terms (not the search term)
+
+    # want to keep the search term separate from other food terms
     other_terms_dict = {}
 
     # process results post by post
     for post in results.posts:
-        # make a record in the results table
-        ##make_results_record(post, search_id)
-
-        # get the title of that blog post
+        make_results_record(post, search_id)
         post_title = post.title
 
         # extract food terms from title text
@@ -326,7 +303,6 @@ def process_blog_results(results, search_id, search_term):
     if other_terms_dict != {}:
         build_pairs(search_term, search_id, other_terms_dict)
 
-    # return results
     return other_terms_dict
 
 
@@ -339,8 +315,6 @@ def make_results_record(post, search_id):
     # extract data from post
     publish_date, index_date, post_url = dissect_post(post)
 
-    # make and execute insert statement
-
     # make connection (object)
     conn = engine.connect()
 
@@ -349,22 +323,15 @@ def make_results_record(post, search_id):
     results = Table('results', metadata, 
                         autoload=True, autoload_with=engine)
 
-    # check if post_url is already in the db
-
     selection = select([results]).where(results.c.url == post_url)
     selection_result = conn.execute(selection)
 
     # prevent redundant URLs in table
     if not selection_result:
-        # new url not already in results; add record to results
-
-        # create insert statement (obj)
         ins = results.insert().values(publish_date=publish_date, 
                                        index_date=index_date, 
                                        url=post_url, 
                                        search_id=search_id)
-
-        # execute insert statement
         conn.execute(ins)
 
 
@@ -394,16 +361,11 @@ def build_pairs(search_term, search_id, other_terms_dict):
     food_terms = Table('food_terms', metadata_food_terms, 
                         autoload=True, autoload_with=engine)
 
-    # get id of search term
     search_term_id = get_term_id(search_term, food_terms, conn)
 
     for other_term, count in other_terms_dict.items():
-        ### make a record in the pairings table
-
-        # get the id for the food term from food_terms (add if not there)
+        # make a record in the pairings table
         other_term_id = food_terms_record(other_term)
-
-        # put pairings record in db
         make_pairings_record(conn, pairings, search_term_id, other_term_id, 
                                                     search_id, count)
 
@@ -412,11 +374,8 @@ def make_pairings_record(connection_obj, pairings, search_term_id,
                                     other_term_id, search_id, count):
     """Add a record to the pairings table."""
 
-    # create insert statement (obj)
     ins = pairings.insert().values(food_id1=search_term_id, 
                                    food_id2=other_term_id, 
                                    search_id=search_id, 
                                    occurences=count)
-
-    # execute insert statement
     connection_obj.execute(ins)

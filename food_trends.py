@@ -11,7 +11,6 @@ from flask import jsonify
 
 import os
 
-from db import connect_to_db
 import calls
 import forms
 
