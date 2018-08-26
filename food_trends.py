@@ -85,10 +85,5 @@ def search_blogs():
 
 if __name__ == "__main__":
     """Run the server."""
-
-    # connect to db
-    connect_to_db(app)
-    print("Connected to DB")
-
     # run application on localhost
     app.run(port=5000, host="0.0.0.0", debug=True)
