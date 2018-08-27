@@ -101,7 +101,7 @@ def get_final_term(terms_list):
 
 #####################################################################
 #### I HAVE LIMITED ACCESS TO THIS API; USE MOCK FOR DEV
-def find_matches(food_term="carrot"):
+def find_matches(food_term):
     """
     Make call to Twingly Blog Search API. Search blog post TITLES using the 
     food term from get_food_term().
@@ -181,7 +181,7 @@ def get_search_window():
 def build_twingly_query(food_term, search_window):
     """Build query string for Twingly Blog Search API."""
     
-    return (food_term + " fields:title lang:en page-size:3 sort:created " + 
+    return (food_term + " fields:title lang:en page-size:20 sort:created " + 
             search_window)
 
 
@@ -368,5 +368,5 @@ def get_pairing_popularities(pairings_dict, num_matches_returned):
     Returns a dictionary of the same food term and its popularity score:
         {"food_term": popularity, ..., "food_term_n": popularity}
     """
-    return {food_term: int((occurences/num_matches_returned)*10) for \
+    return {food_term: (occurences/num_matches_returned)*10 for \
                 (food_term, occurences) in pairings_dict.items()}

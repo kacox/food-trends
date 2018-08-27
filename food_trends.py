@@ -65,11 +65,11 @@ def search_blogs():
         final_term = request.form.get("choice")
 
     # `final_term` hard-coded to "carrot" right now; change later
-    results_dict = jsonify(calls.find_matches()).data
+    results_dict = jsonify(calls.find_matches("carrot")).data
 
     return redirect(url_for("display_results", 
                                 srch_results=results_dict, 
-                                srch_term="carrot"))
+                                srch_term=final_term))
 
 
 @app.route("/results", methods=["GET"])
@@ -82,12 +82,12 @@ def display_results():
     search_id = session["search_id"]
     record = calls.get_search_record(search_id)
     num_matches_total, num_matches_returned = record[4], record[5]
-    
+
     srch_term_pop = calls.get_srch_term_popularity(num_matches_total)
     pairing_popularities = calls.get_pairing_popularities(results, 
                                                           num_matches_returned)
 
-
+    session.clear()
     return render_template("results.html", 
                             header_text=srch_term, 
                             results=pairing_popularities,
