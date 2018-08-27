@@ -5,9 +5,11 @@
 {% endblock %}
 
 {% block heading %}
-  {{ header_text }}
+  {{ header_text }} -- {{ term_popularity }}
 {% endblock %}
 
 {% block main %}
-  {{ results }}
+  {% for term, popularity in results.items() %}
+    {{ term }} -- {{ popularity}}<br>
+  {% endfor %}
 {% endblock %}

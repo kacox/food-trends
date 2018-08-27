@@ -9,7 +9,7 @@ import os
 import json
 
 from flask import Flask, render_template, redirect, request, url_for, flash
-from flask import jsonify
+from flask import jsonify, session
 
 import calls
 import forms
@@ -79,12 +79,19 @@ def display_results():
     srch_term = request.args.get("srch_term")
     results = json.loads(request.args.get("srch_results"))
     
-    # calculate search term popularity
-    # for each pairing, calculate pairing popularity
+    search_id = session["search_id"]
+    record = calls.get_search_record(search_id)
+    num_matches_total, num_matches_returned = record[4], record[5]
+    
+    srch_term_pop = calls.get_srch_term_popularity(num_matches_total)
+    pairing_popularities = calls.get_pairing_popularities(results, 
+                                                          num_matches_returned)
+
 
     return render_template("results.html", 
                             header_text=srch_term, 
-                            results=list(results.keys()))
+                            results=pairing_popularities,
+                            term_popularity=srch_term_pop)
 
 
 #####################################################################

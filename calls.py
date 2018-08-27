@@ -10,6 +10,7 @@ from sqlalchemy import Table
 from sqlalchemy.sql import select
 from sqlalchemy.exc import IntegrityError
 from twingly_search import Client
+from flask import session
 
 from connector import DBConnector
 import mock_spoonacular
@@ -126,6 +127,10 @@ def find_matches(food_term="carrot"):
     search_id = make_searches_record(results.number_of_matches_total, 
                                         results.number_of_matches_returned,
                                         term_id)
+
+    # want to access search id in several routes
+    session["search_id"] = search_id
+
     return process_blog_results(results, search_id, food_term)
 
     """
@@ -334,3 +339,34 @@ def make_pairings_record(pairings, search_term_id, other_term_id,
                                    search_id=search_id, 
                                    occurences=count)
     db.execute(ins)
+
+#####################################################################
+# metric calculations and support fxns
+
+def get_search_record(search_id):
+    """Retrieve the search record associated with search_id."""
+    searches = db.meta.tables["searches"]
+    selection = select([searches]).where(searches.c.id == search_id)
+    
+    return db.execute(selection).fetchone()
+
+
+def get_srch_term_popularity(num_matches_total):
+    """Calculate the search term popularity."""
+    # based on the past week
+    return num_matches_total // 7
+
+
+def get_pairing_popularities(pairings_dict, num_matches_returned):
+    """
+    Determine popularity of pairings with original search term.
+
+    Takes a dictionary containing a pairing food term and the number of times 
+    it occured in the search:
+        {"food_term": occurences, ..., "food_term_n": occurences}
+
+    Returns a dictionary of the same food term and its popularity score:
+        {"food_term": popularity, ..., "food_term_n": popularity}
+    """
+    return {food_term: int((occurences/num_matches_returned)*10) for \
+                (food_term, occurences) in pairings_dict.items()}
