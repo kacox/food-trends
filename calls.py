@@ -6,17 +6,21 @@ import requests
 import json
 from datetime import datetime
 
-from sqlalchemy import Table, MetaData
+from sqlalchemy import Table
 from sqlalchemy.sql import select
 from sqlalchemy.exc import IntegrityError
 from twingly_search import Client
 
-from connector import engine
+from connector import DBConnector
 import mock_spoonacular
 
-# get api key from envionment variables
+
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
 # TWINGLY_SEARCH_KEY pulled from environment variables by library
+
+# several fxns need to access the database
+DB_PATH = "postgresql:///food_trends"
+db = DBConnector(DB_PATH)
 
 
 #####################################################################
@@ -186,37 +190,30 @@ def food_terms_record(food_term):
     Return the id of the inserted term.
     """
 
-    # make connection (object)
-    conn = engine.connect()
-
-    # reflect db object
-    metadata = MetaData()
-    food_terms = Table('food_terms', metadata, 
-                        autoload=True, autoload_with=engine)
+    db.reflect()
+    food_terms = db.meta.tables['food_terms']
 
     # format is 'INSERT INTO food_terms (id, term) VALUES (:id, :term)'
     ins = food_terms.insert().values(term=food_term.lower())
 
-    # insert if not in db; then get food term's id
+    # want to execute statment then get food term's id
     try:
-        result = conn.execute(ins)
-        # result is ResultProxy object (analogous to the DBAPI cursor object)
+        result = db.execute(ins)
         term_id = result.inserted_primary_key[0]
     except IntegrityError:
         # sqlalchemy wraps psycopg2.IntegrityError with its own exception
         print("This food term is already in the table.")
-        term_id = get_term_id(food_term=food_term.lower(), 
-                              table_obj=food_terms,
-                              connection_obj=conn)
+        term_id = get_term_id(food_term=food_term.lower())
 
     return term_id
 
 
-def get_term_id(food_term, table_obj, connection_obj):
+def get_term_id(food_term):
     """Get and return the id of a given food term in the db."""
 
-    selection = select([table_obj]).where(table_obj.c.term == food_term)
-    result = connection_obj.execute(selection)
+    food_terms = db.meta.tables["food_terms"]
+    selection = select([food_terms]).where(food_terms.c.term == food_term)
+    result = db.execute(selection)
 
     return result.fetchone()[0]
 
@@ -228,44 +225,22 @@ def make_searches_record(num_matches_total, num_matches_returned, term_id):
                        num_matches_total, num_matches_returned
     """
 
-    # make connection (object)
-    conn = engine.connect()
-
-    # reflect db object
-    metadata = MetaData()
-    searches = Table('searches', metadata, 
-                        autoload=True, autoload_with=engine)
-
-
-    ### get all the information you need to make a new searches record
     ts = datetime.utcnow()
-
-    # get search window (hard-coded for now)
     search_window = "tspan:w"
+    searches = db.meta.tables["searches"]
 
-    ### make searches record and commit to db
     ins = searches.insert().values(user_timestamp=ts, 
                                    search_window=search_window, 
                                    food_id=term_id, 
                                    num_matches_total=num_matches_total,
                                    num_matches_returned=num_matches_returned)
-    result = conn.execute(ins)
+    result = db.execute(ins)
 
     return result.inserted_primary_key[0]
 
 
 def process_blog_results(results, search_id, search_term):
-    """Get desired data from blog search results.
-
-    for every result:
-        get the title of that blog post
-        make a record in the results table
-        extract food terms from title text (get_food_terms)
-        build pairs
-        add records to pairings table for each pair
-
-    search_id defaults to 0 (for testing) if not given.
-    """
+    """Get desired data from blog search results."""
 
     # want to keep the search term separate from other food terms
     other_terms_dict = {}
@@ -275,7 +250,6 @@ def process_blog_results(results, search_id, search_term):
         make_results_record(post, search_id)
         post_title = post.title
 
-        # extract food terms from title text
         # THIS IS THE 3RD AND FINAL ROUND OF API CALLS
         # BUILD OUT PAIRING MECHANISM FIRST (BELOW)
         other_terms = get_food_terms(post_title, MASHAPE_KEY)
@@ -312,27 +286,19 @@ def make_results_record(post, search_id):
 
     Fields to include: publish_date, index_date, url, search_id
     """
-    # extract data from post
     publish_date, index_date, post_url = dissect_post(post)
-
-    # make connection (object)
-    conn = engine.connect()
-
-    # reflect db object
-    metadata = MetaData()
-    results = Table('results', metadata, 
-                        autoload=True, autoload_with=engine)
+    results = db.meta.tables["results"]
 
     selection = select([results]).where(results.c.url == post_url)
-    selection_result = conn.execute(selection)
+    result = db.execute(selection)
 
-    # prevent redundant URLs in table
-    if not selection_result:
+    # do not want redundant URLs in table
+    if not result:
         ins = results.insert().values(publish_date=publish_date, 
                                        index_date=index_date, 
                                        url=post_url, 
                                        search_id=search_id)
-        conn.execute(ins)
+        db.execute(ins)
 
 
 def dissect_post(post):
@@ -349,33 +315,22 @@ def dissect_post(post):
 def build_pairs(search_term, search_id, other_terms_dict):
     """Create pairings and put each in database."""
 
-    # make connection (object)
-    conn = engine.connect()
-
-    # reflect db objects
-    metadata_pairings = MetaData()
-    pairings = Table('pairings', metadata_pairings, 
-                        autoload=True, autoload_with=engine)
-
-    metadata_food_terms = MetaData()
-    food_terms = Table('food_terms', metadata_food_terms, 
-                        autoload=True, autoload_with=engine)
-
-    search_term_id = get_term_id(search_term, food_terms, conn)
+    pairings = db.meta.tables["pairings"]
+    search_term_id = get_term_id(search_term)
 
     for other_term, count in other_terms_dict.items():
         # make a record in the pairings table
         other_term_id = food_terms_record(other_term)
-        make_pairings_record(conn, pairings, search_term_id, other_term_id, 
+        make_pairings_record(pairings, search_term_id, other_term_id, 
                                                     search_id, count)
 
 
-def make_pairings_record(connection_obj, pairings, search_term_id, 
-                                    other_term_id, search_id, count):
+def make_pairings_record(pairings, search_term_id, other_term_id, 
+                                                search_id, count):
     """Add a record to the pairings table."""
 
     ins = pairings.insert().values(food_id1=search_term_id, 
                                    food_id2=other_term_id, 
                                    search_id=search_id, 
                                    occurences=count)
-    connection_obj.execute(ins)
+    db.execute(ins)
