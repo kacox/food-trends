@@ -13,6 +13,7 @@ from twingly_search import Client
 
 from connector import DBConnector
 import mock_spoonacular
+import mock_twingly
 
 
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
@@ -118,7 +119,6 @@ def find_matches(food_term="carrot"):
     # results = client.execute_query(q)
 
     # FAKE API CALL
-    import mock_twingly
     results = mock_twingly.mock_api_call()
 
     # add relevant information to dbs related to call
