@@ -1,14 +1,11 @@
-"""
-Code to create tables in Food Trends application.
+"""Code to create tables in Food Trends application.
 
 Run directly to create (empty) tables from scratch.
 """
 
-# imports
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, MetaData, ForeignKey
 from sqlalchemy import Integer, String, BigInteger, DateTime
-
 
 """
 NOTE TO SELF:
@@ -19,11 +16,6 @@ Engine.execute() or Engine.connect() is called, THEN the Engine establishes a
 real DBAPI connection to the database, which is then used to emit the SQL.
 """
 
-
-### DEFINE TABLES
-
-# MetaData: a collection of Table objects and their associated schema 
-# constructs.
 metadata = MetaData()
 
 food_terms = Table("food_terms", metadata,
@@ -55,14 +47,9 @@ results = Table("results", metadata,
 
 if __name__ == '__main__':
      """Create tables if script run directly."""
-
-     ### CREATE ENGINE (core interface to db)
      engine = create_engine("postgresql:///food_trends", echo=True)
 
-     ### CREATE TABLES IN DB
      ans = input("Are you sure you want to make the tables? (Y/N) ")
      if ans.upper() == "Y":
-          # create tables
           metadata.create_all(engine, checkfirst=True)
-          # report completion
           print("Tables made in db.")

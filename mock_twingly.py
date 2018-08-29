@@ -5,11 +5,10 @@ import xml.etree.ElementTree as ET
 
 
 def mock_api_call():
+    """Make a fake Twingly API call.
+
+    Create and return a mock Result object for the search term 'carrot'.
     """
-    Make a fake Twingly API call: create and return a mock Result object for 
-    the search term 'carrot'.
-    """
-    
     result_obj = Result()
     result_obj.number_of_matches_returned = 10
     result_obj.number_of_matches_total = 1160
@@ -26,7 +25,6 @@ def make_posts():
     Post objects need to have the post's url, title, indexedAt, and 
     publishedAt elements' text.
     """
-
     tree = ET.parse("sample_responses/sample_carrot_twingly_test.xml")
     root = tree.getroot()
 
@@ -35,7 +33,6 @@ def make_posts():
         current_post = Post()
 
         for sub_child in child:
-            # each sub_child is an attribute of the post
             current_tag = sub_child.tag
             if current_tag == "url": 
                 current_post.url = sub_child.text

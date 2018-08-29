@@ -1,6 +1,5 @@
 """API calls  and their helper fxns for Food Trends application."""
 
-# imports
 import os
 import requests
 import json
@@ -67,11 +66,8 @@ def find_matches(food_term):
     Search blog post TITLES using the food term from get_food_term() and 
     return dictionary with pairing matches.
     """
-    # # build query string
-    # search_window = "tspan:w"
-    # q = build_twingly_query(food_term, search_window)
-
-    # # make the actual query
+    # # real API call
+    # q = build_twingly_query(food_term, "tspan:w")
     # client = Client()
     # results = client.execute_query(q)
 
@@ -183,7 +179,7 @@ def process_blog_results(results, search_id, search_term):
         build_pairs(search_term, search_id, other_terms_dict)
 
     return other_terms_dict
-    
+
 
 def make_results_record(post, search_id):
     """Add a record to the results table.
@@ -218,12 +214,10 @@ def dissect_post(post):
 
 def build_pairs(search_term, search_id, other_terms_dict):
     """Create pairings and put each in database."""
-
     pairings = db.meta.tables["pairings"]
     search_term_id = get_term_id(search_term)
 
     for other_term, count in other_terms_dict.items():
-        # make a record in the pairings table
         other_term_id = food_terms_record(other_term)
         make_pairings_record(pairings, search_term_id, other_term_id, 
                                                     search_id, count)
@@ -232,7 +226,6 @@ def build_pairs(search_term, search_id, other_terms_dict):
 def make_pairings_record(pairings, search_term_id, other_term_id, 
                                                 search_id, count):
     """Add a record to the pairings table."""
-
     ins = pairings.insert().values(food_id1=search_term_id, 
                                    food_id2=other_term_id, 
                                    search_id=search_id, 

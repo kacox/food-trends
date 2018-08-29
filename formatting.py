@@ -2,8 +2,7 @@
 
 
 def format_pairings(pairings_dict):
-    """
-    Format pairings results in D3-friendly format.
+    """Format pairings results in D3-friendly format.
 
     Input:
     {'bread': 1.0, 'cake': 4.0, 

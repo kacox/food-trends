@@ -8,8 +8,7 @@ def get_srch_term_popularity(num_matches_total):
 
 
 def get_pairing_popularities(pairings_dict, num_matches_returned):
-    """
-    Determine popularity of pairings with original search term.
+    """Determine popularity of pairings with original search term.
 
     Takes a dictionary containing a pairing food term and the number of times 
     it occured in the search:

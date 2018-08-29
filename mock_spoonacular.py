@@ -31,14 +31,10 @@ import json
 
 def get_response_text(user_query):
     """Get the payload of the response as text."""
-    # get the filepath associated with the user query
     filepath = "sample_responses/spoonacular_ccarrotcake.txt"
-
-    # open and read in as string
     with open(filepath, "r") as f:
         file_text = f.read()
 
-    # return the string
     return file_text
 
 
@@ -58,14 +54,11 @@ def terms_from_response(response_content):
 
 
 def mock_get_food_terms(user_query):
-    """
-    Mock getting food terms from input text using Spoonacular API.
+    """Mock getting food terms from input text using Spoonacular API.
 
     Return list of food terms (dupes removed).
     """
-    # open and extract data from file
     response_text = get_response_text(user_query)
-        
-    # extract food terms from response
     response_content = json.loads(response_text)
+    
     return terms_from_response(response_content)
