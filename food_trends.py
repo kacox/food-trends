@@ -13,6 +13,8 @@ from flask import jsonify, session
 
 import calls
 import forms
+import metric_calcs as calcs
+import formatting
 
 
 APP_KEY = os.environ.get("APP_KEY")
@@ -83,8 +85,8 @@ def display_results():
     record = calls.get_search_record(search_id)
     num_matches_total, num_matches_returned = record[4], record[5]
 
-    srch_term_pop = calls.get_srch_term_popularity(num_matches_total)
-    pairing_popularities = calls.get_pairing_popularities(results, 
+    srch_term_pop = calcs.get_srch_term_popularity(num_matches_total)
+    pairing_popularities = calcs.get_pairing_popularities(results, 
                                                           num_matches_returned)
 
     # AJAX call in results.html will get this from the session
@@ -100,31 +102,7 @@ def display_results():
 def get_graph_data():
     """Get the pairings data from the session."""
     pairings = session["pairings"]
-    dataset = calls.format_pairings(pairings)
-
-    # dataset = {
-    #         "children": [{"Name":"Olives","Count":4319},
-    #             {"Name":"Tea","Count":4159},
-    #             {"Name":"Mashed Potatoes","Count":2583},
-    #             {"Name":"Boiled Potatoes","Count":2074},
-    #             {"Name":"Milk","Count":1894},
-    #             {"Name":"Chicken Salad","Count":1809},
-    #             {"Name":"Vanilla Ice Cream","Count":1713},
-    #             {"Name":"Cocoa","Count":1636},
-    #             {"Name":"Lettuce Salad","Count":1566},
-    #             {"Name":"Lobster Salad","Count":1511},
-    #             {"Name":"Chocolate","Count":1489},
-    #             {"Name":"Apple Pie","Count":1487},
-    #             {"Name":"Orange Juice","Count":1423},
-    #             {"Name":"American Cheese","Count":1372},
-    #             {"Name":"Green Peas","Count":1341},
-    #             {"Name":"Assorted Cakes","Count":1331},
-    #             {"Name":"French Fried Potatoes","Count":1328},
-    #             {"Name":"Potato Salad","Count":1306},
-    #             {"Name":"Baked Potatoes","Count":1293},
-    #             {"Name":"Roquefort","Count":1273},
-    #             {"Name":"Stewed Prunes","Count":1268}]
-    #     }
+    dataset = formatting.format_pairings(pairings)
 
     session.clear()
     return jsonify(dataset)

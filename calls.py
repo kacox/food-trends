@@ -340,8 +340,6 @@ def make_pairings_record(pairings, search_term_id, other_term_id,
                                    occurences=count)
     db.execute(ins)
 
-#####################################################################
-# metric calculations and support fxns
 
 def get_search_record(search_id):
     """Retrieve the search record associated with search_id."""
@@ -349,51 +347,3 @@ def get_search_record(search_id):
     selection = select([searches]).where(searches.c.id == search_id)
     
     return db.execute(selection).fetchone()
-
-
-def get_srch_term_popularity(num_matches_total):
-    """Calculate the search term popularity."""
-    # based on the past week
-    return num_matches_total // 7
-
-
-def get_pairing_popularities(pairings_dict, num_matches_returned):
-    """
-    Determine popularity of pairings with original search term.
-
-    Takes a dictionary containing a pairing food term and the number of times 
-    it occured in the search:
-        {"food_term": occurences, ..., "food_term_n": occurences}
-
-    Returns a dictionary of the same food term and its popularity score:
-        {"food_term": popularity, ..., "food_term_n": popularity}
-    """
-    return {food_term: (occurences/num_matches_returned)*10 for \
-                (food_term, occurences) in pairings_dict.items()}
-
-#####################################################################
-def format_pairings(pairings_dict):
-    """
-    Format pairings results in D3-friendly format.
-
-    Input:
-    {'bread': 1.0, 'cake': 4.0, 
-                   'carrot cake': 2.0, 
-                   'date': 1.0, 
-                   ... }
-
-    Output:
-    dataset = {'children': [
-                {'Name': 'Olives', 'Count': 4319},
-                {'Name': 'Tea', 'Count': 4159}, ... ]
-              }
-    """
-    dataset = {"children": []}
-
-    for pairing in pairings_dict.items():
-        inner_dict = {}
-        inner_dict["Name"] = pairing[0]
-        inner_dict["Count"] = pairing[1]
-        dataset["children"].append(inner_dict)
-
-    return dataset
