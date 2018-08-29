@@ -25,7 +25,6 @@ app.config['SECRET_KEY'] = APP_KEY
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Display landing page with search form."""
-
     form = forms.QueryForm(request.form)
 
     if form.validate_on_submit():
@@ -42,10 +41,7 @@ def index():
 @app.route("/verify-term", methods=["GET", "POST"])
 def get_final_term():
     """Get the final search term from the user query."""
-
     query = request.args.get("srch_query")
-
-    # make request to Spoonacular (find food terms in user query)
     parsed_terms = calls.get_food_terms(query, calls.MASHAPE_KEY)
 
     # want user to pick the final search term
@@ -60,7 +56,6 @@ def get_final_term():
 @app.route("/search", methods=["GET", "POST"])
 def search_blogs():
     """Do blog search with final search term."""
-
     if request.method == "GET":
         final_term = request.args.get("choice")
     else:
@@ -77,7 +72,6 @@ def search_blogs():
 @app.route("/results", methods=["GET"])
 def display_results():
     """Show the search results and calculated metrics."""
-
     srch_term = request.args.get("srch_term")
     results = json.loads(request.args.get("srch_results"))
     

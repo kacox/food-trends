@@ -24,28 +24,20 @@ MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
 DB_PATH = "postgresql:///food_trends"
 db = DBConnector(DB_PATH)
 
-
 #####################################################################
 def get_food_terms(input_text, api_key):
     """Get food terms from input text using Spoonacular API.
 
-    Make call to Spoonacular (POST Detect Food in Text endpoint).
     Return list of food terms (dupes removed).
     """
-    
-    # check that you have the API key
     if api_key:
-        # assign request arguments
         endpoint_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/food/detect"
         payload = {"text": input_text}
         headers = {"X-Mashape-Key": api_key,
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Accept": "application/json"}
-
-        # make request
         r = requests.post(endpoint_url, data=payload, headers=headers)
         
-    # extract food terms from response
     response_content = json.loads(r.text)
     return terms_from_response(response_content)
 
@@ -68,51 +60,15 @@ def terms_from_response(response_content):
     return list(terms)
 
 
-def get_final_term(terms_list):
-    """Choose final term to use for later queries and pair building."""
-
-    # for now, ask in terminal which term to use
-    # CHANGE LATER FOR UI SELECTION (radio buttons or drop down)
-    valid_indx = False
-    print("Final terms:", terms_list)
-    while not valid_indx:
-        print("Pick a term using its index (0 to", 
-                                str(len(terms_list) - 1) + "): ")
-        user_choice = input()
-
-        # input validation
-        try:
-            # check if integer
-            user_choice = int(user_choice)
-
-            # check range
-            if (user_choice >= 0) and (user_choice < len(terms_list)):
-                # choice in valid index range
-                valid_indx = True
-            else:
-                print("Choice is out of range.")
-        except ValueError:
-            print("Please choose a valid index as an integer.")
-            
-
-    # select term
-    return terms_list[user_choice]
-
-
-#####################################################################
 #### I HAVE LIMITED ACCESS TO THIS API; USE MOCK FOR DEV
 def find_matches(food_term):
+    """Make call to Twingly Blog Search API. 
+
+    Search blog post TITLES using the food term from get_food_term() and 
+    return dictionary with pairing matches.
     """
-    Make call to Twingly Blog Search API. Search blog post TITLES using the 
-    food term from get_food_term().
-
-    Need to build a query (see below functions).
-
-    Return dictionary with pairing matches.
-    """
-
     # # build query string
-    # search_window = get_search_window()
+    # search_window = "tspan:w"
     # q = build_twingly_query(food_term, search_window)
 
     # # make the actual query
@@ -122,7 +78,6 @@ def find_matches(food_term):
     # FAKE API CALL
     results = mock_twingly.mock_api_call()
 
-    # add relevant information to dbs related to call
     term_id = food_terms_record(food_term)
     search_id = make_searches_record(results.number_of_matches_total, 
                                         results.number_of_matches_returned,
@@ -133,54 +88,9 @@ def find_matches(food_term):
 
     return process_blog_results(results, search_id, food_term)
 
-    """
-    `results` represents a result from a Query to the Search API
-    Attributes:
-        number_of_matches_returned (int):
-                number of Posts the Query returned
-        number_of_matches_total (int):
-                total number of Posts the Query matched
-        seconds_elapsed (float):
-                number of seconds it took to execute the Query
-        posts (list of Post):
-                all Posts that matched the Query; list of Post objects
-    """
-
-    
-def get_search_window():
-    """
-    Determine search window time period for next call to Twingly.
-
-    I am restricting the search window to the past week while developing, 
-    but maybe expand to last month and last three months depending on 
-    average result sizes.
-
-    FROM DOCS:
-        The default is to search in posts published at any time.
-
-        example:
-        `tspan:24h`
-
-        The supported arguments to tspan are:
-
-            h - posts published the last hour
-            12h - posts published the last 12 hours
-            24h - posts published the last 24 hours
-            w - posts published the last week
-            m - posts published the last month
-            3m - posts published the last three months
-
-        how it would look in a final query string:        
-        `q = 'github page-size: 10 lang:sv tspan:24h'`
-    """
-    # hard-coded for now; may change in future
-    search_window = "w"
-    return "tspan:" + search_window
-
 
 def build_twingly_query(food_term, search_window):
     """Build query string for Twingly Blog Search API."""
-    
     return (food_term + " fields:title lang:en page-size:20 sort:created " + 
             search_window)
 
@@ -194,11 +104,8 @@ def food_terms_record(food_term):
 
     Return the id of the inserted term.
     """
-
     db.reflect()
     food_terms = db.meta.tables['food_terms']
-
-    # format is 'INSERT INTO food_terms (id, term) VALUES (:id, :term)'
     ins = food_terms.insert().values(term=food_term.lower())
 
     # want to execute statment then get food term's id
@@ -215,7 +122,6 @@ def food_terms_record(food_term):
 
 def get_term_id(food_term):
     """Get and return the id of a given food term in the db."""
-
     food_terms = db.meta.tables["food_terms"]
     selection = select([food_terms]).where(food_terms.c.term == food_term)
     result = db.execute(selection)
@@ -229,7 +135,6 @@ def make_searches_record(num_matches_total, num_matches_returned, term_id):
     Fields to include: user_timestamp, search_window, food_id, 
                        num_matches_total, num_matches_returned
     """
-
     ts = datetime.utcnow()
     search_window = "tspan:w"
     searches = db.meta.tables["searches"]
@@ -250,7 +155,6 @@ def process_blog_results(results, search_id, search_term):
     # want to keep the search term separate from other food terms
     other_terms_dict = {}
 
-    # process results post by post
     for post in results.posts:
         make_results_record(post, search_id)
         post_title = post.title
@@ -266,25 +170,20 @@ def process_blog_results(results, search_id, search_term):
         #print(post_title)
         #print(other_terms, "\n")
 
-        # take food terms extracted from post and update dict
         for term in other_terms:
             if term in other_terms_dict.keys():
-                # increment count
                 other_terms_dict[term] += 1
             else:
-                # new entry
                 other_terms_dict[term] = 1
 
 
     #print(other_terms_dict, "\n")
-    # other terms dict now has info from all blog posts from this search_id
-    # make pairs; add pairings record for each to db ONLY IF NOT EMPTY
+
     if other_terms_dict != {}:
         build_pairs(search_term, search_id, other_terms_dict)
 
     return other_terms_dict
-
-
+    
 
 def make_results_record(post, search_id):
     """Add a record to the results table.
