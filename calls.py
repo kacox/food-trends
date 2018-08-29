@@ -91,8 +91,6 @@ def build_twingly_query(food_term, search_window):
             search_window)
 
 
-# PARTIALLY TESTED ABOVE LINE
-#####################################################################
 def food_terms_record(food_term):
     """Add a food term to the food_terms table if not there.
 
@@ -155,25 +153,17 @@ def process_blog_results(results, search_id, search_term):
         make_results_record(post, search_id)
         post_title = post.title
 
-        # THIS IS THE 3RD AND FINAL ROUND OF API CALLS
-        # BUILD OUT PAIRING MECHANISM FIRST (BELOW)
         other_terms = get_food_terms(post_title, MASHAPE_KEY)
 
         # clean so that search term is not in other_terms
         if search_term in other_terms:
             other_terms.remove(search_term)
 
-        #print(post_title)
-        #print(other_terms, "\n")
-
         for term in other_terms:
             if term in other_terms_dict.keys():
                 other_terms_dict[term] += 1
             else:
                 other_terms_dict[term] = 1
-
-
-    #print(other_terms_dict, "\n")
 
     if other_terms_dict != {}:
         build_pairs(search_term, search_id, other_terms_dict)
