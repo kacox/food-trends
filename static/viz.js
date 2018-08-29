@@ -1,9 +1,8 @@
 // reference: https://bl.ocks.org/alokkshukla/3d6be4be0ef9f6977ec6718b2916d168
 function makeBubbleChart(data) {
-  console.log("AJAX SUCCESS");
-  console.log(data)
+  // console.log("AJAX SUCCESS");
   var diameter = 600;
-  var color = d3.scaleOrdinal(d3.schemeCategory20);
+  var color = d3.scaleOrdinal(d3.schemeCategory20c);
 
   var bubble = d3.pack(data)
       .size([diameter, diameter])
@@ -44,33 +43,21 @@ function makeBubbleChart(data) {
       });
 
   node.append("text")
-      .attr("dy", ".2em")
+      .attr("dy", ".3em")
       .style("text-anchor", "middle")
       .text(function(d) {
           return d.data.Name.substring(0, d.r / 3);
       })
       .attr("font-family", "sans-serif")
       .attr("font-size", function(d){
-          return d.r/5;
+          return d.r/4;
       })
-      .attr("fill", "white");
-
-  node.append("text")
-      .attr("dy", "1.3em")
-      .style("text-anchor", "middle")
-      .text(function(d) {
-          return d.data.Count;
-      })
-      .attr("font-family",  "Gill Sans", "Gill Sans MT")
-      .attr("font-size", function(d){
-          return d.r/5;
-      })
-      .attr("fill", "white");
+      .attr("fill", "black");
 
   d3.select(self.frameElement)
       .style("height", diameter + "px");
 }
 
 
-// get data in AJAX request then callback
+// main
 d3.json('/data.json', makeBubbleChart)
