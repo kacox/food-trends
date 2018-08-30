@@ -12,7 +12,7 @@ class TestLandingPage(unittest.TestCase):
     """Test the landing page."""
 
     def setUp(self):
-        """Get the main page."""
+        """Make an app instance."""
         food_trends.app.config["TESTING"] = True
         self.client = food_trends.app.test_client()
 
@@ -35,6 +35,31 @@ class TestLandingPage(unittest.TestCase):
         """Flash error message should appear."""
         response = self.client.post("/", data={"user_query": "carrot8"})
         self.assertIn(b"Only letters and apostrophes allowed", response.data)
+
+    def test_validate_on_submit(self):
+        """Should redirect to '/verify-term' route."""
+        pass
+
+
+class TestVerifyTerm(unittest.TestCase):
+    """Test '/verify-term' route."""
+
+    def setUp(self):
+        """Make an app instance."""
+        food_trends.app.config["TESTING"] = True
+        self.client = food_trends.app.test_client()
+
+    def test_single_term(self):
+        """Should redirect to '/search' route."""
+        pass
+
+    def test_multi_term(self):
+        """'term_chooser.html' should be displayed."""
+        pass
+
+    def test_something(self):
+        """derp."""
+        pass
 
 
 #####################################################################
