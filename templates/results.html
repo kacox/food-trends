@@ -9,9 +9,12 @@
 {% endblock %}
 
 {% block main %}
+  Search date: {{ timestamp }}
+  <p>
   {% for term, popularity in results.items() %}
-    {{ term }} -- {{ popularity}}<br>
+    <strong>{{ term }}</strong>: {{ popularity}}<br>
   {% endfor %}
+  </p>
 {% endblock %}
 
 {% block scripts %}

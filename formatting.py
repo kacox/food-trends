@@ -1,6 +1,5 @@
 """Data formatting functions."""
 
-
 def format_pairings(pairings_dict):
     """Format pairings results in D3-friendly format.
 

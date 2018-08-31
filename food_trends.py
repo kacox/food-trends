@@ -62,33 +62,33 @@ def search_blogs():
         final_term = request.form.get("choice")
 
     # `final_term` hard-coded to "carrot" right now; change later
-    results_dict = jsonify(calls.find_matches("carrot")).data
+    calls.find_store_matches("carrot")
 
-    return redirect(url_for("display_results", 
-                                srch_results=results_dict, 
-                                srch_term=final_term))
+    return redirect(url_for("display_results"))
 
 
 @app.route("/results", methods=["GET"])
 def display_results():
     """Show the search results and calculated metrics."""
-    srch_term = request.args.get("srch_term")
-    results = json.loads(request.args.get("srch_results"))
-    
     search_id = session["search_id"]
-    record = calls.get_search_record(search_id)
-    num_matches_total, num_matches_returned = record[4], record[5]
 
+    search_record = calls.get_search_record(search_id)
+    timestamp, srch_term_id = search_record[1], search_record[3]
+    num_matches_total, num_matches_returned = search_record[4], search_record[5]
+
+    srch_term = calls.get_search_term(srch_term_id)
     srch_term_pop = calcs.get_srch_term_popularity(num_matches_total)
-    pairing_popularities = calcs.get_pairing_popularities(results, 
-                                                          num_matches_returned)
 
-    # AJAX call in results.html will get this from the session
-    session["pairings"] = pairing_popularities
+    pairings_dict = calls.get_pairings(search_id)
+    pairings = calcs.get_pairing_popularities(pairings_dict, num_matches_returned)
+
+    # AJAX call in viz.js will get this from the session
+    session["pairings"] = pairings
     
     return render_template("results.html", 
-                            header_text=srch_term, 
-                            results=pairing_popularities,
+                            header_text=srch_term.capitalize(), 
+                            timestamp=timestamp.strftime("%m-%d-%y"),
+                            results=pairings,
                             term_popularity=srch_term_pop)
 
 

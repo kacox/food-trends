@@ -11,6 +11,7 @@ level of an application, not per-object or per-function call.'
 """
 
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.sql import select
 
 
 class DBConnector():
@@ -33,3 +34,24 @@ class DBConnector():
         """Wrapper to execute a SQL construct."""
         with self.engine.connect() as conn:
             return conn.execute(statement)
+
+    def search_record(self, search_id):
+        """Retrieve the search record associated with search_id."""
+        searches = self.meta.tables["searches"]
+        selection = select([searches]).where(searches.c.id == search_id)
+        
+        return self.execute(selection).fetchone()
+
+    def pairings_by_search(self, search_id):
+        """Retrieve pairing records associated with search_id."""
+        pairings = self.meta.tables["pairings"]
+        selection = select([pairings]).where(pairings.c.search_id == search_id)
+        
+        return self.execute(selection).fetchall()
+
+    def term_by_id(self, term_id):
+        """Retrieve food term using its id."""
+        food_terms = self.meta.tables["food_terms"]
+        selection = select([food_terms]).where(food_terms.c.id == term_id)
+        
+        return self.execute(selection).fetchone()

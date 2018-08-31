@@ -60,11 +60,11 @@ def terms_from_response(response_content):
 
 
 #### I HAVE LIMITED ACCESS TO THIS API; USE MOCK FOR DEV
-def find_matches(food_term):
+def find_store_matches(food_term):
     """Make call to Twingly Blog Search API. 
 
-    Search blog post TITLES using the food term from get_food_term() and 
-    return dictionary with pairing matches.
+    Search blog post TITLES using the food term. Store relevant response
+    information in the database.
     """
     # # real API call
     # q = build_twingly_query(food_term, "tspan:w")
@@ -78,11 +78,10 @@ def find_matches(food_term):
     search_id = make_searches_record(results.number_of_matches_total, 
                                         results.number_of_matches_returned,
                                         term_id)
+    process_blog_results(results, search_id, food_term)
 
     # want to access search id in several routes
     session["search_id"] = search_id
-
-    return process_blog_results(results, search_id, food_term)
 
 
 def build_twingly_query(food_term, search_window):
@@ -91,6 +90,7 @@ def build_twingly_query(food_term, search_window):
             search_window)
 
 
+#### TODO: ABSTRACT TO DB CLASS
 def food_terms_record(food_term):
     """Add a food term to the food_terms table if not there.
 
@@ -123,6 +123,7 @@ def get_term_id(food_term):
     return result.fetchone()[0]
 
 
+#### TODO: ABSTRACT TO DB CLASS
 def make_searches_record(num_matches_total, num_matches_returned, term_id):
     """Add a record to the searches table.
 
@@ -144,7 +145,7 @@ def make_searches_record(num_matches_total, num_matches_returned, term_id):
 
 
 def process_blog_results(results, search_id, search_term):
-    """Get desired data from blog search results."""
+    """Put desired data from blog search results into database."""
 
     # want to keep the search term separate from other food terms
     other_terms_dict = {}
@@ -168,9 +169,8 @@ def process_blog_results(results, search_id, search_term):
     if other_terms_dict != {}:
         build_pairs(search_term, search_id, other_terms_dict)
 
-    return other_terms_dict
 
-
+#### TODO: ABSTRACT TO DB CLASS
 def make_results_record(post, search_id):
     """Add a record to the results table.
 
@@ -212,7 +212,7 @@ def build_pairs(search_term, search_id, other_terms_dict):
         make_pairings_record(pairings, search_term_id, other_term_id, 
                                                     search_id, count)
 
-
+#### TODO: ABSTRACT TO DB CLASS
 def make_pairings_record(pairings, search_term_id, other_term_id, 
                                                 search_id, count):
     """Add a record to the pairings table."""
@@ -225,7 +225,27 @@ def make_pairings_record(pairings, search_term_id, other_term_id,
 
 def get_search_record(search_id):
     """Retrieve the search record associated with search_id."""
-    searches = db.meta.tables["searches"]
-    selection = select([searches]).where(searches.c.id == search_id)
-    
-    return db.execute(selection).fetchone()
+    return db.search_record(search_id)
+
+
+def get_search_term(term_id):
+    """Retrieve the search term from its id."""
+    return db.term_by_id(term_id)[1]
+
+
+def get_pairings(search_id):
+    """Retrieve all pairings associated with a given search id.
+
+    Return a dictionary containing a pairing food term and the number of times 
+    it occured in the search:
+        {"food_term": occurences, ..., "food_term_n": occurences}
+    """
+    pairings = db.pairings_by_search(search_id)
+
+    pairings_dict = {}
+    for pairing in pairings:
+        pairing_term = db.term_by_id(pairing[2])[1]
+        occurences = pairing[4]
+        pairings_dict[pairing_term] = occurences
+
+    return pairings_dict
