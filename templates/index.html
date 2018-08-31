@@ -14,23 +14,40 @@
   writers, recipe developers, and foodies looking to tap into current food 
   trends.</p>
 
-  <p>
-    <form method="POST" action="/">
+  <div>
+    <p><button class="new-search">New Search?</button></p>
+  </div>
 
-      <strong>What is paired with...?</strong>
+  <div class="search-form" hidden>
+    <p>
+      <form method="POST" action="/">
 
-      {# CSRF protection #}
-      {{ form.hidden_tag() }}
+        <strong>What is paired with...?</strong>
 
-      <p>{{ form.user_query.label }} {{ form.user_query }}</p>
+        {# CSRF protection #}
+        {{ form.hidden_tag() }}
 
-      <p>{{ form.submit() }}</p>
+        <p>{{ form.user_query.label }} {{ form.user_query }}</p>
 
-    </form>
-  </p>
+        <p>{{ form.submit() }}</p>
 
+      </form>
+    </p>
+  </div>
+
+  <div>
+    <p>
+      <form class="recent-searches" action="/">
+        <input type="submit" value="Recent Searches">
+      </form>
+    </p>
+  </div>
 
   <p style="padding: 25px;">
       <i>DURING DEVELOPMENT PLEASE CHOOSE CARROT AS FINAL TERM</i>
   </p>
+{% endblock %}
+
+{% block scripts %}
+  <script src="static/main.js"></script>
 {% endblock %}
