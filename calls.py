@@ -3,11 +3,7 @@
 import os
 import requests
 import json
-from datetime import datetime
 
-from sqlalchemy import Table
-from sqlalchemy.sql import select
-from sqlalchemy.exc import IntegrityError
 from twingly_search import Client
 from flask import session
 
@@ -74,10 +70,10 @@ def find_store_matches(food_term):
     # FAKE API CALL
     results = mock_twingly.mock_api_call()
 
-    term_id = food_terms_record(food_term)
-    search_id = make_searches_record(results.number_of_matches_total, 
-                                        results.number_of_matches_returned,
-                                        term_id)
+    term_id = db.new_food_term_record(food_term)
+    search_id = db.new_search_record(term_id, 
+                                        results.number_of_matches_total, 
+                                        results.number_of_matches_returned)
     process_blog_results(results, search_id, food_term)
 
     # want to access search id in several routes
@@ -90,60 +86,6 @@ def build_twingly_query(food_term, search_window):
             search_window)
 
 
-#### TODO: ABSTRACT TO DB CLASS
-def food_terms_record(food_term):
-    """Add a food term to the food_terms table if not there.
-
-    This function should run when new searches are made.
-
-    Return the id of the inserted term.
-    """
-    db.reflect()
-    food_terms = db.meta.tables['food_terms']
-    ins = food_terms.insert().values(term=food_term.lower())
-
-    # want to execute statment then get food term's id
-    try:
-        result = db.execute(ins)
-        term_id = result.inserted_primary_key[0]
-    except IntegrityError:
-        # sqlalchemy wraps psycopg2.IntegrityError with its own exception
-        print("This food term is already in the table.")
-        term_id = get_term_id(food_term=food_term.lower())
-
-    return term_id
-
-
-def get_term_id(food_term):
-    """Get and return the id of a given food term in the db."""
-    food_terms = db.meta.tables["food_terms"]
-    selection = select([food_terms]).where(food_terms.c.term == food_term)
-    result = db.execute(selection)
-
-    return result.fetchone()[0]
-
-
-#### TODO: ABSTRACT TO DB CLASS
-def make_searches_record(num_matches_total, num_matches_returned, term_id):
-    """Add a record to the searches table.
-
-    Fields to include: user_timestamp, search_window, food_id, 
-                       num_matches_total, num_matches_returned
-    """
-    ts = datetime.utcnow()
-    search_window = "tspan:w"
-    searches = db.meta.tables["searches"]
-
-    ins = searches.insert().values(user_timestamp=ts, 
-                                   search_window=search_window, 
-                                   food_id=term_id, 
-                                   num_matches_total=num_matches_total,
-                                   num_matches_returned=num_matches_returned)
-    result = db.execute(ins)
-
-    return result.inserted_primary_key[0]
-
-
 def process_blog_results(results, search_id, search_term):
     """Put desired data from blog search results into database."""
 
@@ -151,7 +93,7 @@ def process_blog_results(results, search_id, search_term):
     other_terms_dict = {}
 
     for post in results.posts:
-        make_results_record(post, search_id)
+        db.new_results_record(post, search_id)
         post_title = post.title
 
         other_terms = get_food_terms(post_title, MASHAPE_KEY)
@@ -170,62 +112,19 @@ def process_blog_results(results, search_id, search_term):
         build_pairs(search_term, search_id, other_terms_dict)
 
 
-#### TODO: ABSTRACT TO DB CLASS
-def make_results_record(post, search_id):
-    """Add a record to the results table.
-
-    Fields to include: publish_date, index_date, url, search_id
-    """
-    publish_date, index_date, post_url = dissect_post(post)
-    results = db.meta.tables["results"]
-
-    selection = select([results]).where(results.c.url == post_url)
-    result = db.execute(selection)
-
-    # do not want redundant URLs in table
-    if not result:
-        ins = results.insert().values(publish_date=publish_date, 
-                                       index_date=index_date, 
-                                       url=post_url, 
-                                       search_id=search_id)
-        db.execute(ins)
-
-
-def dissect_post(post):
-    """Get publish_date, index_date, and post_url from blog post.
-
-    Post object attributes:
-        published_at  (datetime.datetime)
-        indexed_at    (datetime.datetime)
-        url           (string)
-    """
-    return post.published_at, post.indexed_at, post.url
-
-
 def build_pairs(search_term, search_id, other_terms_dict):
     """Create pairings and put each in database."""
-    pairings = db.meta.tables["pairings"]
-    search_term_id = get_term_id(search_term)
+    search_term_id = db.id_by_term(search_term)
 
     for other_term, count in other_terms_dict.items():
-        other_term_id = food_terms_record(other_term)
-        make_pairings_record(pairings, search_term_id, other_term_id, 
+        other_term_id = db.new_food_term_record(other_term)
+        db.new_pairings_record(search_term_id, other_term_id, 
                                                     search_id, count)
-
-#### TODO: ABSTRACT TO DB CLASS
-def make_pairings_record(pairings, search_term_id, other_term_id, 
-                                                search_id, count):
-    """Add a record to the pairings table."""
-    ins = pairings.insert().values(food_id1=search_term_id, 
-                                   food_id2=other_term_id, 
-                                   search_id=search_id, 
-                                   occurences=count)
-    db.execute(ins)
 
 
 def get_search_record(search_id):
     """Retrieve the search record associated with search_id."""
-    return db.search_record(search_id)
+    return db.search_record_by_id(search_id)
 
 
 def get_search_term(term_id):

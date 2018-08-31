@@ -49,6 +49,9 @@ def get_final_term():
         return render_template("term_chooser.html", 
                                 header_text=query, 
                                 results=parsed_terms)
+    elif len(parsed_terms) < 1:
+        flash("Please enter a food or ingredient.")
+        return redirect(url_for("index"))
     else:
         return redirect(url_for("search_blogs", choice=parsed_terms[0]))
 
