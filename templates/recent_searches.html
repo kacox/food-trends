@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Recent searches
+{% endblock %}
+
+{% block heading %}
+    Recent searches
+{% endblock %}
+
+{% block main %}
+    {% for summary in summaries %}
+        <p>
+        <a href="/recent-searches/{{ summary[1] }}"><strong>{{ summary[0].capitalize() }}</strong></a>: 
+
+        {{ summary[2] }}<br>
+        Paired with: 
+        {% for food_item in summary[3] %}
+            {% if loop.index < loop.length %}
+                {{ food_item }}, 
+            {% else %}
+                {{ food_item }}
+            {% endif %}
+        {% endfor %}
+        </p>
+    {% endfor %}
+{% endblock %}

@@ -12,7 +12,7 @@ level of an application, not per-object or per-function call.'
 
 from datetime import datetime
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, desc
 from sqlalchemy.sql import select
 from sqlalchemy.exc import IntegrityError
 
@@ -122,7 +122,7 @@ class DBConnector():
         food_terms = self.meta.tables["food_terms"]
         selection = select([food_terms]).where(food_terms.c.id == term_id)
         
-        return self.execute(selection).fetchone()
+        return self.execute(selection).fetchone()[1]
 
     def id_by_term(self, food_term):
         """Retrieve a food term's id by the term itself."""
@@ -131,3 +131,17 @@ class DBConnector():
         result = self.execute(selection)
 
         return result.fetchone()[0]
+
+    def recent_n_searches(self, num_searches):
+        """Return serach records for the n most recent searches searches.
+
+        Information included: id, user_timestamp, food_id
+        """
+        self.reflect()
+        searches = self.meta.tables["searches"]
+
+        selection = select([searches.c.id, 
+                            searches.c.user_timestamp, 
+                            searches.c.food_id]).order_by(desc(searches.c.id)).limit(num_searches)
+
+        return self.execute(selection).fetchall()

@@ -83,7 +83,8 @@ def display_results():
     srch_term_pop = calcs.get_srch_term_popularity(num_matches_total)
 
     pairings_dict = calls.get_pairings(search_id)
-    pairings = calcs.get_pairing_popularities(pairings_dict, num_matches_returned)
+    pairings = calcs.get_pairing_popularities(pairings_dict, 
+                                                num_matches_returned)
 
     # AJAX call in viz.js will get this from the session
     session["pairings"] = pairings
@@ -100,9 +101,21 @@ def get_graph_data():
     """Get the pairings data from the session."""
     pairings = session["pairings"]
     dataset = formatting.format_pairings(pairings)
-
     session.clear()
     return jsonify(dataset)
+
+
+@app.route("/recent-searches")
+def get_recent():
+    """Display recent search summaries."""
+    summaries = calls.search_summaries()
+    return render_template("recent_searches.html", summaries=summaries)
+
+
+@app.route("/recent-searches/<past_search_id>")
+def past_result(past_search_id):
+    """Display a past search's results."""
+    return "Past search {}'s results.".format(past_search_id)
 
 
 #####################################################################

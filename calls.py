@@ -129,7 +129,7 @@ def get_search_record(search_id):
 
 def get_search_term(term_id):
     """Retrieve the search term from its id."""
-    return db.term_by_id(term_id)[1]
+    return db.term_by_id(term_id)
 
 
 def get_pairings(search_id):
@@ -143,8 +143,43 @@ def get_pairings(search_id):
 
     pairings_dict = {}
     for pairing in pairings:
-        pairing_term = db.term_by_id(pairing[2])[1]
+        pairing_term = db.term_by_id(pairing[2])
         occurences = pairing[4]
         pairings_dict[pairing_term] = occurences
 
     return pairings_dict
+
+
+def search_summaries():
+    """Get a list containing recent search summaries."""
+    records = db.recent_n_searches(6)
+    return build_summary_info(records)    
+
+
+def build_summary_info(records):
+    """Build a list containing search record summaries.
+    
+    Return a list as follows:
+        [(foodterm1, search_id, searchdate, [previews]), 
+                (foodterm2, search_id, searchdate, [previews]),
+                ... ]
+    """
+    summaries = []
+    for record in records:
+        previews = get_previews(record[0])
+        summaries.append((db.term_by_id(record[2]), 
+                                        record[0], 
+                                        record[1].strftime("%m-%d-%y"), 
+                                        previews))
+    return summaries
+
+
+def get_previews(search_id):
+    """Get the first 3 pairing foods associated with food_id."""
+    records = db.pairings_by_search(search_id)
+    all_pairing_terms = [db.term_by_id(record[2]) for record in records]
+
+    if len(all_pairing_terms) >= 3:
+        return all_pairing_terms[:3]
+    else:
+        return all_pairing_terms[:len(all_pairing_terms)]
