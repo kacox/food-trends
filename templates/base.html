@@ -33,9 +33,14 @@
       Main content of page here.
     {% endblock %}
 
+    {% block bubblechart %}
+    {% endblock %}
+
   </body>
 
   {% block scripts %}
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="../static/viz.js"></script>
   {% endblock %}
   
 </html>

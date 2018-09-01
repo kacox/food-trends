@@ -62,13 +62,13 @@ def find_store_matches(food_term):
     Search blog post TITLES using the food term. Store relevant response
     information in the database.
     """
-    # # real API call
-    # q = build_twingly_query(food_term, "tspan:w")
-    # client = Client()
-    # results = client.execute_query(q)
+    # real API call
+    q = build_twingly_query(food_term, "tspan:w")
+    client = Client()
+    results = client.execute_query(q)
 
-    # FAKE API CALL
-    results = mock_twingly.mock_api_call()
+    # # FAKE API CALL
+    # results = mock_twingly.mock_api_call()
 
     term_id = db.new_food_term_record(food_term)
     search_id = db.new_search_record(term_id, 
@@ -152,8 +152,8 @@ def get_pairings(search_id):
 
 def search_summaries():
     """Get a list containing recent search summaries."""
-    records = db.recent_n_searches(6)
-    return build_summary_info(records)    
+    records = db.recent_n_searches(10)
+    return build_summary_info(records)
 
 
 def build_summary_info(records):

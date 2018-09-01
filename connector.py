@@ -105,6 +105,7 @@ class DBConnector():
 
     def search_record_by_id(self, search_id):
         """Retrieve the search record associated with search_id."""
+        self.reflect()
         searches = self.meta.tables["searches"]
         selection = select([searches]).where(searches.c.id == search_id)
         
@@ -133,7 +134,7 @@ class DBConnector():
         return result.fetchone()[0]
 
     def recent_n_searches(self, num_searches):
-        """Return serach records for the n most recent searches searches.
+        """Return search records for the n most recent searches searches.
 
         Information included: id, user_timestamp, food_id
         """

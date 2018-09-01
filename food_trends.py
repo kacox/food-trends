@@ -65,7 +65,7 @@ def search_blogs():
         final_term = request.form.get("choice")
 
     # `final_term` hard-coded to "carrot" right now; change later
-    calls.find_store_matches("carrot")
+    calls.find_store_matches(final_term)
 
     return redirect(url_for("display_results"))
 
@@ -115,8 +115,25 @@ def get_recent():
 @app.route("/recent-searches/<past_search_id>")
 def past_result(past_search_id):
     """Display a past search's results."""
-    return "Past search {}'s results.".format(past_search_id)
 
+    search_record = calls.get_search_record(past_search_id)
+    timestamp, srch_term_id = search_record[1], search_record[3]
+    num_matches_total, num_matches_returned = search_record[4], search_record[5]
+
+    srch_term = calls.get_search_term(srch_term_id)
+    srch_term_pop = calcs.get_srch_term_popularity(num_matches_total)
+
+    pairings_dict = calls.get_pairings(past_search_id)
+    pairings = calcs.get_pairing_popularities(pairings_dict, 
+                                                num_matches_returned)
+
+    session["pairings"] = pairings
+
+    return render_template("results.html", 
+                            header_text=srch_term.capitalize(), 
+                            timestamp=timestamp.strftime("%m-%d-%y"),
+                            results=pairings,
+                            term_popularity=srch_term_pop)
 
 #####################################################################
 
