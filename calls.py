@@ -10,6 +10,7 @@ from flask import session
 from connector import DBConnector
 import mock_spoonacular
 import mock_twingly
+import metric_calcs as calcs
 
 
 MASHAPE_KEY = os.environ.get("MASHAPE_KEY")
@@ -62,13 +63,13 @@ def find_store_matches(food_term):
     Search blog post TITLES using the food term. Store relevant response
     information in the database.
     """
-    # real API call
-    q = build_twingly_query(food_term, "tspan:w")
-    client = Client()
-    results = client.execute_query(q)
+    # # real API call
+    # q = build_twingly_query(food_term, "tspan:w")
+    # client = Client()
+    # results = client.execute_query(q)
 
-    # # FAKE API CALL
-    # results = mock_twingly.mock_api_call()
+    # FAKE API CALL
+    results = mock_twingly.mock_api_call()
 
     term_id = db.new_food_term_record(food_term)
     search_id = db.new_search_record(term_id, 
@@ -148,6 +149,22 @@ def get_pairings(search_id):
         pairings_dict[pairing_term] = occurences
 
     return pairings_dict
+
+
+def gather_results(search_id):
+    """Gather information for displaying search results."""
+    search_record = get_search_record(search_id)
+    timestamp, srch_term_id = search_record[1], search_record[3]
+    num_matches_total, num_matches_returned = search_record[4], search_record[5]
+
+    srch_term = get_search_term(srch_term_id)
+    srch_term_pop = calcs.get_srch_term_popularity(num_matches_total)
+
+    pairings_dict = get_pairings(search_id)
+    pairings = calcs.get_pairing_popularities(pairings_dict, 
+                                                num_matches_returned)
+
+    return srch_term, timestamp, pairings, srch_term_pop
 
 
 def search_summaries():
