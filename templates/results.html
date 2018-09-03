@@ -5,16 +5,18 @@
 {% endblock %}
 
 {% block heading %}
-  {{ header_text }} -- {{ term_popularity }}
+  <div id="page-title">{{ header_text }} -- {{ term_popularity }}</div>
 {% endblock %}
 
 {% block main %}
+<div id="left-side-box">
   Search date: {{ timestamp }}
   <p>
   {% for term, popularity in results.items() %}
     <strong>{{ term }}</strong>: {{ popularity}}<br>
   {% endfor %}
   </p>
+</div>
 {% endblock %}
 
 {% block bubblechart %}

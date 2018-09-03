@@ -18,29 +18,36 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-
   </head>
 
+
   <body>
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <h1>
-      {% block heading %}
-        Heading goes here
-      {% endblock %}
-    </h1>
 
-    {% block main %}
-      Main content of page here.
-    {% endblock %}
+    <div id="wrapper">
 
-    {% block bubblechart %}
-    {% endblock %}
+      <header>
+        <h1>{% block heading %}Heading goes here{% endblock %}</h1>
+      </header>
+
+      <main>
+        {% block main %}Main content of page here.{% endblock %}
+
+        {% block bubblechart %}{% endblock %}
+      </main>
+
+      <footer>
+        {% block footer %}{% endblock %}
+      </footer>
+
+    </div>
 
   </body>
 
   {% block scripts %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="static/main.js"></script>
     <script src="../static/viz.js"></script>
-  {% endblock %}
-  
+  {% endblock %} 
 </html>

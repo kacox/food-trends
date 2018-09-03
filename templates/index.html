@@ -5,10 +5,11 @@
 {% endblock %}
 
 {% block heading %}
-  Food Trends
+  <div id="page-title">Food Trends</div>
 {% endblock %}
 
 {% block main %}
+<div id="main-page-box">
   <p>Welcome to Food Trends! This application lets you discover popular 
   ingredient pairings in the blogosphere. It is intended for food bloggers, 
   writers, recipe developers, and foodies looking to tap into current food 
@@ -41,12 +42,11 @@
       <input type="submit" value="Recent Searches">
     </form>
   </p>
-
-  <p style="padding: 25px;">
-      <i>DURING DEVELOPMENT PLEASE CHOOSE CARROT AS FINAL TERM</i>
-  </p>
+</div>
 {% endblock %}
 
-{% block scripts %}
-  <script src="static/main.js"></script>
+{% block footer %}
+<p style="padding: 25px;" id="dev-note">
+    <i>DURING DEVELOPMENT PLEASE CHOOSE CARROT AS FINAL TERM</i>
+</p>
 {% endblock %}

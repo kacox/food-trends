@@ -5,10 +5,11 @@
 {% endblock %}
 
 {% block heading %}
-    Recent searches
+    <div id="page-title">Recent searches</div>
 {% endblock %}
 
 {% block main %}
+  <div id="main-page-box">
     {% for summary in summaries %}
         <p>
         <a href="/recent-searches/{{ summary[1] }}"><strong>{{ summary[0].capitalize() }}</strong></a>: 
@@ -24,4 +25,5 @@
         {% endfor %}
         </p>
     {% endfor %}
+  </div>
 {% endblock %}

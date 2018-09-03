@@ -5,10 +5,11 @@
 {% endblock %}
 
 {% block heading %}
-  Which food term did you mean?
+  <div id="page-title">Which food term did you mean?</div>
 {% endblock %}
 
 {% block main %}
+<div id="main-page-box">
   <p>
     <form method="POST" action="/search">
 
@@ -25,4 +26,5 @@
 
     </form>
   </p>
+</div>
 {% endblock %}
