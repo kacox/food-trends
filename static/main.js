@@ -1,13 +1,17 @@
-
 // clicking on "New Search?" will show the search form
-const searchForm = $(".search-form");
-const searchBtn = $(".new-search")
-const recentBtn = $(".recent-searches")
+const searchForm = $("#search-form");
+const searchBtn = $("#new-search")
+const recentBtn = $("#recent-searches")
 
-function showSearchForm(evt) {
+function showSearchForm() {
+    console.log("Inside fxn");
     searchBtn.hide();
     recentBtn.hide();
-    searchForm.show();
+    searchForm.removeAttr("hidden");
 }
 
-searchBtn.on("click", showSearchForm);
+searchBtn.submit(function( event ) {
+    // debugger;
+  showSearchForm();
+  event.preventDefault();
+});
