@@ -9,18 +9,22 @@
 {% endblock %}
 
 {% block main %}
-<div id="main-page-box">
-  Search date: {{ timestamp }}
-  <p>
-  {% for term, popularity in results.items() %}
-    <strong>{{ term }}</strong>: {{ popularity}}<br>
-  {% endfor %}
-  </p>
+<div class="results-box">
+    <div id="main-page-box">
+      Search date: {{ timestamp }}
+      <p>
+      {% for term, popularity in results.items() %}
+        <strong>{{ term }}</strong>: {{ popularity}}<br>
+      {% endfor %}
+      </p>
+    </div>
 </div>
 {% endblock %}
 
 {% block bubblechart %}
-<div id="bubble-chart"></div>
+<div class="results-box">
+    <div id="bubble-chart"></div>
+</div>
 {% endblock %}
 
 {% block scripts %}

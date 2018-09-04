@@ -16,27 +16,28 @@
 
 #navbar li {
     float: left;
+    text-transform: uppercase;
 }
 
 #navbar a {
     display: block;
     color: white;
+    font-family: "Courier", monospaced;
+    font-size: 30px;
     text-align: center;
-    padding: 10px 10px;
+    padding: 4px 10px;
     text-decoration: none;
     font-weight: 600;
 }
 
 #page-title {
     text-align: center;
-    color: #000000;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
 }
 
 body {
   margin: 0;
   letter-spacing: 0.1em;
+  font-family: "Helvetica", sans-serif;
   background: url(seigaiha.png);
   background-repeat: repeat;
   background-color: #f0eff4;
@@ -53,6 +54,10 @@ body {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+.results-box {
+    display: inline-block;
 }
 
 #dev-note {
