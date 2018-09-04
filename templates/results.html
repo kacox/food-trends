@@ -9,21 +9,21 @@
 
 {% block main %}
 <div class="results-box">
-      <h2>{{ header_text }} -- {{ term_popularity }}</h2>
-      Search date: {{ timestamp }}
-      <p>
-      {% for term, popularity in results.items() %}
-        <strong>{{ term }}</strong>: {{ popularity}}<br>
-      {% endfor %}
-      <br>
-      <a href="/recent-searches">Return to recent results</a>
-      </p>
+  <h2>{{ header_text }} -- {{ term_popularity }}</h2>
+  Search date: {{ timestamp }}
+  <p>
+  {% for term, popularity in results.items() %}
+    <strong>{{ term }}</strong>: {{ popularity}}<br>
+  {% endfor %}
+  <br>
+  <a href="/recent-searches">Return to recent results</a>
+  </p>
 </div>
 {% endblock %}
 
 {% block bubblechart %}
 <div class="bubble-box">
-    <div id="bubble-chart"></div>
+  <div id="bubble-chart"></div>
 </div>
 {% endblock %}
 
