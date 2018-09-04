@@ -32,7 +32,7 @@ def index():
         return redirect(url_for("get_final_term", srch_query=query))
         
     if form.errors:
-        for error in form.errors["user_query"]:
+        for error in form.errors.get("user_query", []):
             flash(error)
 
     return render_template("index.html", form=form)
@@ -73,7 +73,11 @@ def search_blogs():
 @app.route("/results", methods=["GET"])
 def display_results():
     """Show the search results and calculated metrics."""
-    search_id = session["search_id"]
+    search_id = session.get("search_id")
+    if not search_id:
+        flash("Not a valid search.")
+        return redirect(url_for("index"))
+
     srch_term, timestamp, pairings, srch_term_pop = calls.gather_results(search_id)
 
     # AJAX call in viz.js will get this from the session
@@ -89,7 +93,11 @@ def display_results():
 @app.route("/data.json")
 def get_graph_data():
     """Get the pairings data from the session."""
-    pairings = session["pairings"]
+    pairings = session.get("pairings")
+    if not pairings:
+        flash("User did not enter a query.")
+        return redirect(url_for("index"))
+
     dataset = formatting.format_pairings(pairings)
     session.clear()
     return jsonify(dataset)
