@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block main %}
-<div id="left-side-box">
+<div id="main-page-box">
   Search date: {{ timestamp }}
   <p>
   {% for term, popularity in results.items() %}
@@ -21,4 +21,9 @@
 
 {% block bubblechart %}
 <div id="bubble-chart"></div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/viz.js"></script>
 {% endblock %}

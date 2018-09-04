@@ -1,23 +1,45 @@
 /* Styles! */
 
 .flash-msg {
-    color: #ff6600;
+    color: #9d464d;
     font-weight: bold;
+    text-align: center;
+}
+
+#navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #9d464d;
+}
+
+#navbar li {
+    float: left;
+}
+
+#navbar a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 10px 10px;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 #page-title {
     text-align: center;
     color: #000000;
     text-transform: uppercase;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.2em;
 }
 
 body {
-  margin: 1.5em;
+  margin: 0;
   letter-spacing: 0.1em;
-  background-color: #FFDDFF;
-  background-image: url("brooke-lark-385507-unsplash.jpg");
-  background-size: cover;
+  background: url(seigaiha.png);
+  background-repeat: repeat;
+  background-color: #f0eff4;
 }
 
 #main-page-box {
@@ -27,37 +49,23 @@ body {
     border-color: #000000;
     color: #000000;
     width: 60%;
-    background-color: #FFFFFFCC;
+    background-color: #FFFFFFAA;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
 }
 
-#left-side-box {
-    padding: 1em;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #000000;
-    color: #000000;
-    width: 60%;
-    background-color: #FFFFFF;
-    margin-right: auto;
-}
-
-i {
-    color: deeppink;
+#dev-note {
+    text-align: center;
+    color: #9d464d;
     font-weight: bold;
 }
 
-#dev-note {
-    text-align: center;
-}
-
 a {
-    color: deeppink;
-    text-decoration: none;
+    color: #9d464d;
     }
 
 a:hover {
-    color: #000000;
+    color: #d29fa5;
+    text-decoration: none;
     }

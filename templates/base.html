@@ -2,52 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-
-    <link rel="stylesheet" type="text/css" href="static/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
     
-    <title>
-      {% block title %}
-        Title goes here
-      {% endblock %}
-    </title>
-    
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <p class="flash-msg">{{ message }}</p>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <title>{% block title %}Title goes here{% endblock %}</title>
   </head>
-
 
   <body>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
-    <div id="wrapper">
-
-      <header>
-        <h1>{% block heading %}Heading goes here{% endblock %}</h1>
-      </header>
-
-      <main>
-        {% block main %}Main content of page here.{% endblock %}
-
-        {% block bubblechart %}{% endblock %}
-      </main>
-
-      <footer>
-        {% block footer %}{% endblock %}
-      </footer>
-
+    <div id="navbar">
+      <ul>
+        <li><a href="/">Food Trends</a></li>
+      </ul>
     </div>
 
-  </body>
+    <div id="main">
+      <h1>{% block heading %}Heading goes here{% endblock %}</h1>
+
+      {% block main %}Main content of page here.{% endblock %}
+
+      {% block bubblechart %}{% endblock %}
+
+      {% block footer %}{% endblock %}
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <p class="flash-msg">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+  </div>
 
   {% block scripts %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="static/main.js"></script>
-    <script src="../static/viz.js"></script>
+    <script src="/static/main.js"></script>
   {% endblock %} 
+
+  </body>
+
+
 </html>
