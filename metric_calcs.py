@@ -17,5 +17,5 @@ def get_pairing_popularities(pairings_dict, num_matches_returned):
     Returns a dictionary of the same food term and its popularity score:
         {"food_term": popularity, ..., "food_term_n": popularity}
     """
-    return {food_term: (occurences/num_matches_returned)*10 for \
+    return {food_term: int((occurences/num_matches_returned)*100) for \
                 (food_term, occurences) in pairings_dict.items()}
