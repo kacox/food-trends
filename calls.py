@@ -174,8 +174,9 @@ def search_summaries():
     # records = db.recent_n_searches(10)
     # FOR DEMO HARD CODED
     records = []
-    for desired_search_id in [109, 110, 129, 119, 128, 
-                                132, 138, 130, 100, 102]:
+    records.append(db.recent_n_searches(1)[0])
+    for desired_search_id in [109, 110, 129, 140, 128, 
+                                132, 138, 130, 100]:
         records.append(db.demo_search_record_by_id(desired_search_id))
     return build_summary_info(records)
 

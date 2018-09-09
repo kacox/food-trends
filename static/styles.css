@@ -93,3 +93,7 @@ a:hover {
     color: rgb(116, 196, 118);
     text-decoration: none;
     }
+
+table {
+    margin: 0px auto;
+}

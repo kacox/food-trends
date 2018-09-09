@@ -114,7 +114,7 @@ class DBConnector():
     def pairings_by_search(self, search_id):
         """Retrieve pairing records associated with search_id."""
         pairings = self.meta.tables["pairings"]
-        selection = select([pairings]).where(pairings.c.search_id == search_id)
+        selection = select([pairings]).where(pairings.c.search_id == search_id).order_by(desc(pairings.c.occurences))
         
         return self.execute(selection).fetchall()
 

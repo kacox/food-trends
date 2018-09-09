@@ -9,15 +9,39 @@
 
 {% block main %}
 <div class="results-box">
-  <h2>{{ header_text }} -- {{ term_popularity }}</h2>
+  <h1>{{ header_text }}</h1>
+  Posts per week ~ {{ term_popularity }}<br>
   Search date: {{ timestamp }}
+
   <p>
-  {% for term, popularity in results.items() %}
-    <strong>{{ term }}</strong>: {{ popularity}}<br>
-  {% endfor %}
-  <br>
-  <a href="/recent-searches">Return to recent results</a>
+    <table>
+      <tr>
+        <th>
+          <u>Pairing</u>
+        </th>
+
+        <th>
+          <u>Popularity</u>
+        </th>
+      </tr>
+
+      {% for term, popularity in results.items() %}
+      <tr>
+        <td>
+          <strong>{{ term }}</strong>
+        </td>
+
+        <td>
+          {{ popularity}}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <br>
+    <a href="/recent-searches">Return to recent results</a>
   </p>
+  
+
 </div>
 {% endblock %}
 
