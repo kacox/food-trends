@@ -146,3 +146,13 @@ class DBConnector():
                             searches.c.food_id]).order_by(desc(searches.c.id)).limit(num_searches)
 
         return self.execute(selection).fetchall()
+
+    def demo_search_record_by_id(self, search_id):
+        """Retrieve the search record associated with search_id."""
+        self.reflect()
+        searches = self.meta.tables["searches"]
+        selection = select([searches.c.id, 
+                            searches.c.user_timestamp, 
+                            searches.c.food_id]).where(searches.c.id == search_id)
+        
+        return self.execute(selection).fetchone()
