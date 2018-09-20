@@ -3,8 +3,6 @@
 
 This repository houses my final project for the Hackbright Academy curriculum.
 
-__CURRENTLY IN PROGRESS__
-
 ## Overview
 Food Trends is a web application that discovers popular ingredient pairings in 
 the blogosphere. It is intended for food bloggers, writers, recipe developers, 
