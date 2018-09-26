@@ -27,3 +27,7 @@ with the term "tomato".
 __APIs used__  
 Spoonacular Ingredient and Nutrition API  
 Twingly Blog Search API
+
+## Screenshots
+
+![alt text](static/screenshots/01.png "Main page")
