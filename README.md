@@ -31,3 +31,11 @@ Twingly Blog Search API
 ## Screenshots
 
 ![alt text](static/screenshots/01.png "Main page")
+
+![alt text](static/screenshots/02.png "Search")
+
+![alt text](static/screenshots/03.png "Search results")
+
+![alt text](static/screenshots/04.png "Recent searches")
+
+![alt text](static/screenshots/05.png "Previous search")
